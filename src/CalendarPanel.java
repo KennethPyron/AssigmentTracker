@@ -49,7 +49,12 @@ public class CalendarPanel extends JPanel {
         rebuildGrid();
 
         // Rebuild so UIManager colors are re-queried after a theme switch.
-        ThemeManager.get().addListener(this::rebuildGrid);
+        // Deferred via invokeLater so the rebuild runs AFTER the LAF-swap
+        // listener (and FlatLaf.updateUI) finishes — otherwise cells get
+        // built with the old theme's UIResource colors, which Swing then
+        // overwrites with the new LAF's Panel.background defaults during
+        // updateUI, wiping the today highlight.
+        ThemeManager.get().addListener(() -> SwingUtilities.invokeLater(this::rebuildGrid));
     }
 
     /** Rebuilds the grid so newly added/removed assignments show up. */
