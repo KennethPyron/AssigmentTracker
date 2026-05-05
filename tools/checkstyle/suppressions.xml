@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+    "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+    "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+
+<suppressions>
+    <!-- Relax checks for test code -->
+    <suppress checks="Javadoc"            files=".*[\\/]test[\\/]"/>
+    <suppress checks="MagicNumber"        files=".*[\\/]test[\\/]"/>
+    <suppress checks="FinalLocalVariable" files=".*[\\/]test[\\/]"/>
+    <suppress checks="LineLength"         files=".*[\\/]test[\\/]"/>
+    <suppress checks="VisibilityModifier" files=".*[\\/]test[\\/]"/>
+    <suppress checks="ImportControl"      files=".*[\\/]test[\\/]"/>
+</suppressions>

@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="JUnit Jupiter" tests="48" skipped="0" failures="0" errors="0" time="0.616" hostname="kenlaptop" timestamp="2026-05-05T09:12:45">
+<properties>
+<property name="file.encoding" value="UTF-8"/>
+<property name="file.separator" value="/"/>
+<property name="java.class.path" value="/home/ken/Repo/AssigmentTracker/build:/home/ken/Repo/AssigmentTracker/build/test-classes:/home/ken/Repo/AssigmentTracker/tools/jars/junit-platform-console-standalone-6.1.0-M1.jar:/home/ken/Repo/AssigmentTracker/lib/flatlaf-3.5.4.jar:/home/ken/Repo/AssigmentTracker/lib/flatlaf-intellij-themes-3.5.4.jar"/>
+<property name="java.class.version" value="65.0"/>
+<property name="java.home" value="/usr/lib/jvm/java-21-openjdk-amd64"/>
+<property name="java.io.tmpdir" value="/tmp"/>
+<property name="java.library.path" value="/usr/java/packages/lib:/usr/lib/x86_64-linux-gnu/jni:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:/usr/lib/jni:/lib:/usr/lib"/>
+<property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
+<property name="java.runtime.version" value="21.0.10+7-Ubuntu-124.04"/>
+<property name="java.specification.name" value="Java Platform API Specification"/>
+<property name="java.specification.vendor" value="Oracle Corporation"/>
+<property name="java.specification.version" value="21"/>
+<property name="java.vendor" value="Ubuntu"/>
+<property name="java.vendor.url" value="https://ubuntu.com/"/>
+<property name="java.vendor.url.bug" value="https://bugs.launchpad.net/ubuntu/+source/openjdk-21"/>
+<property name="java.version" value="21.0.10"/>
+<property name="java.version.date" value="2026-01-20"/>
+<property name="java.vm.compressedOopsMode" value="32-bit"/>
+<property name="java.vm.info" value="mixed mode, sharing"/>
+<property name="java.vm.name" value="OpenJDK 64-Bit Server VM"/>
+<property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+<property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+<property name="java.vm.specification.version" value="21"/>
+<property name="java.vm.vendor" value="Ubuntu"/>
+<property name="java.vm.version" value="21.0.10+7-Ubuntu-124.04"/>
+<property name="jdk.debug" value="release"/>
+<property name="junit.docs.version" value="6.1.0-M1"/>
+<property name="line.separator" value="&#10;"/>
+<property name="native.encoding" value="UTF-8"/>
+<property name="os.arch" value="amd64"/>
+<property name="os.name" value="Linux"/>
+<property name="os.version" value="6.6.87.2-microsoft-standard-WSL2"/>
+<property name="path.separator" value=":"/>
+<property name="stderr.encoding" value="UTF-8"/>
+<property name="stdout.encoding" value="UTF-8"/>
+<property name="sun.arch.data.model" value="64"/>
+<property name="sun.awt.enableExtraMouseButtons" value="true"/>
+<property name="sun.boot.library.path" value="/usr/lib/jvm/java-21-openjdk-amd64/lib"/>
+<property name="sun.cpu.endian" value="little"/>
+<property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+<property name="sun.java.command" value="org.junit.platform.console.ConsoleLauncher execute --scan-classpath=build/test-classes --reports-dir=results/junit --exclude-engine=junit-vintage"/>
+<property name="sun.java.launcher" value="SUN_STANDARD"/>
+<property name="sun.jnu.encoding" value="UTF-8"/>
+<property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+<property name="user.dir" value="/home/ken/Repo/AssigmentTracker"/>
+<property name="user.home" value="/home/ken"/>
+<property name="user.language" value="en"/>
+<property name="user.name" value="ken"/>
+<property name="user.timezone" value="America/Denver"/>
+</properties>
+<testcase name="saveAndLoad_subjectOrderIsPreserved()" classname="DataStoreTest" time="0.001">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:DataStoreTest]/[method:saveAndLoad_subjectOrderIsPreserved()]
+display-name: saveAndLoad_subjectOrderIsPreserved()
+]]></system-out>
+</testcase>
+<testcase name="removeRowDecreasesRowCount()" classname="SubjectTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:SubjectTest]/[method:removeRowDecreasesRowCount()]
+display-name: removeRowDecreasesRowCount()
+]]></system-out>
+</testcase>
+<testcase name="presets_isNonEmpty()" classname="ThemeManagerTest" time="0.001">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:ThemeManagerTest]/[method:presets_isNonEmpty()]
+display-name: presets_isNonEmpty()
+]]></system-out>
+</testcase>
+<testcase name="load_emptyJsonArray_leavesModelEmpty()" classname="DataStoreTest" time="0.001">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:DataStoreTest]/[method:load_emptyJsonArray_leavesModelEmpty()]
+display-name: load_emptyJsonArray_leavesModelEmpty()
+]]></system-out>
+</testcase>
+<testcase name="saveAndLoad_doneFalse_preservedCorrectly()" classname="DataStoreTest" time="0.002">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:DataStoreTest]/[method:saveAndLoad_doneFalse_preservedCorrectly()]
+display-name: saveAndLoad_doneFalse_preservedCorrectly()
+]]></system-out>
+</testcase>
+<testcase name="saveAndLoad_assignmentsRoundTrip()" classname="DataStoreTest" time="0.002">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:DataStoreTest]/[method:saveAndLoad_assignmentsRoundTrip()]
+display-name: saveAndLoad_assignmentsRoundTrip()
+]]></system-out>
+</testcase>
+<testcase name="equals_keyedOnId_sameId_areEqual()" classname="ThemeTest" time="0.191">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:ThemeTest]/[method:equals_keyedOnId_sameId_areEqual()]
+display-name: equals_keyedOnId_sameId_areEqual()
+]]></system-out>
+</testcase>
+<testcase name="multipleSubjectsHaveIndependentTableModels()" classname="SubjectTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:SubjectTest]/[method:multipleSubjectsHaveIndependentTableModels()]
+display-name: multipleSubjectsHaveIndependentTableModels()
+]]></system-out>
+</testcase>
+<testcase name="startup_noPrefs_defaultsToDefaultDark()" classname="ThemeManagerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:ThemeManagerTest]/[method:startup_noPrefs_defaultsToDefaultDark()]
+display-name: startup_noPrefs_defaultsToDefaultDark()
+]]></system-out>
+</testcase>
+<testcase name="apply_withNullAccent_clearsAccentColor()" classname="ThemeTest" time="0.173">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:ThemeTest]/[method:apply_withNullAccent_clearsAccentColor()]
+display-name: apply_withNullAccent_clearsAccentColor()
+]]></system-out>
+</testcase>
+<testcase name="setNameUpdatesName()" classname="SubjectTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:SubjectTest]/[method:setNameUpdatesName()]
+display-name: setNameUpdatesName()
+]]></system-out>
+</testcase>
+<testcase name="bogusThemeId_fallsBackToDefault_doesNotOverwriteSavedValue()" classname="ThemeManagerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:ThemeManagerTest]/[method:bogusThemeId_fallsBackToDefault_doesNotOverwriteSavedValue()]
+display-name: bogusThemeId_fallsBackToDefault_doesNotOverwriteSavedValue()
+]]></system-out>
+</testcase>
+<testcase name="migration_legacyDarkModeTrue_mapsToDefaultDark()" classname="ThemeManagerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:ThemeManagerTest]/[method:migration_legacyDarkModeTrue_mapsToDefaultDark()]
+display-name: migration_legacyDarkModeTrue_mapsToDefaultDark()
+]]></system-out>
+</testcase>
+<testcase name="presets_containsAllNineExpectedIds()" classname="ThemeManagerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:ThemeManagerTest]/[method:presets_containsAllNineExpectedIds()]
+display-name: presets_containsAllNineExpectedIds()
+]]></system-out>
+</testcase>
+<testcase name="getters_returnConstructorValues()" classname="ThemeTest" time="0.002">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:ThemeTest]/[method:getters_returnConstructorValues()]
+display-name: getters_returnConstructorValues()
+]]></system-out>
+</testcase>
+<testcase name="saveAndLoad_subjectNameWithBackslash()" classname="DataStoreTest" time="0.002">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:DataStoreTest]/[method:saveAndLoad_subjectNameWithBackslash()]
+display-name: saveAndLoad_subjectNameWithBackslash()
+]]></system-out>
+</testcase>
+<testcase name="saveAndLoad_singleSubjectNoAssignments()" classname="DataStoreTest" time="0.002">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:DataStoreTest]/[method:saveAndLoad_singleSubjectNoAssignments()]
+display-name: saveAndLoad_singleSubjectNoAssignments()
+]]></system-out>
+</testcase>
+<testcase name="saveAndLoad_assignmentOrderIsPreserved()" classname="DataStoreTest" time="0.002">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:DataStoreTest]/[method:saveAndLoad_assignmentOrderIsPreserved()]
+display-name: saveAndLoad_assignmentOrderIsPreserved()
+]]></system-out>
+</testcase>
+<testcase name="setCurrent_firesListeners()" classname="ThemeManagerTest" time="0.013">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:ThemeManagerTest]/[method:setCurrent_firesListeners()]
+display-name: setCurrent_firesListeners()
+]]></system-out>
+</testcase>
+<testcase name="migration_runsOnlyOnce_subsequentLoadsUseThemeId()" classname="ThemeManagerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:ThemeManagerTest]/[method:migration_runsOnlyOnce_subsequentLoadsUseThemeId()]
+display-name: migration_runsOnlyOnce_subsequentLoadsUseThemeId()
+]]></system-out>
+</testcase>
+<testcase name="setCurrent_isDarkReflectsCurrent()" classname="ThemeManagerTest" time="0.013">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:ThemeManagerTest]/[method:setCurrent_isDarkReflectsCurrent()]
+display-name: setCurrent_isDarkReflectsCurrent()
+]]></system-out>
+</testcase>
+<testcase name="setCurrent_persistsThemeId()" classname="ThemeManagerTest" time="0.036">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:ThemeManagerTest]/[method:setCurrent_persistsThemeId()]
+display-name: setCurrent_persistsThemeId()
+]]></system-out>
+</testcase>
+<testcase name="migration_legacyDarkModeFalse_mapsToDefaultLight()" classname="ThemeManagerTest" time="0.001">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:ThemeManagerTest]/[method:migration_legacyDarkModeFalse_mapsToDefaultLight()]
+display-name: migration_legacyDarkModeFalse_mapsToDefaultLight()
+]]></system-out>
+</testcase>
+<testcase name="toStringReflectsRename()" classname="SubjectTest" time="0.001">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:SubjectTest]/[method:toStringReflectsRename()]
+display-name: toStringReflectsRename()
+]]></system-out>
+</testcase>
+<testcase name="presets_containsBothDefaults()" classname="ThemeManagerTest" time="0.001">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:ThemeManagerTest]/[method:presets_containsBothDefaults()]
+display-name: presets_containsBothDefaults()
+]]></system-out>
+</testcase>
+<testcase name="tableModelHasCorrectColumnNames()" classname="SubjectTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:SubjectTest]/[method:tableModelHasCorrectColumnNames()]
+display-name: tableModelHasCorrectColumnNames()
+]]></system-out>
+</testcase>
+<testcase name="constructorCreatesEmptyTableModel()" classname="SubjectTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:SubjectTest]/[method:constructorCreatesEmptyTableModel()]
+display-name: constructorCreatesEmptyTableModel()
+]]></system-out>
+</testcase>
+<testcase name="apply_withAccent_putsAccentColorInUIManager()" classname="ThemeTest" time="0.009">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:ThemeTest]/[method:apply_withAccent_putsAccentColorInUIManager()]
+display-name: apply_withAccent_putsAccentColorInUIManager()
+]]></system-out>
+</testcase>
+<testcase name="saveAndLoad_assignmentNameWithSpecialChars()" classname="DataStoreTest" time="0.002">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:DataStoreTest]/[method:saveAndLoad_assignmentNameWithSpecialChars()]
+display-name: saveAndLoad_assignmentNameWithSpecialChars()
+]]></system-out>
+</testcase>
+<testcase name="saveAndLoad_multipleSubjects()" classname="DataStoreTest" time="0.001">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:DataStoreTest]/[method:saveAndLoad_multipleSubjects()]
+display-name: saveAndLoad_multipleSubjects()
+]]></system-out>
+</testcase>
+<testcase name="saveAndLoad_subjectNameWithQuotes()" classname="DataStoreTest" time="0.001">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:DataStoreTest]/[method:saveAndLoad_subjectNameWithQuotes()]
+display-name: saveAndLoad_subjectNameWithQuotes()
+]]></system-out>
+</testcase>
+<testcase name="addedRowContainsCorrectData()" classname="SubjectTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:SubjectTest]/[method:addedRowContainsCorrectData()]
+display-name: addedRowContainsCorrectData()
+]]></system-out>
+</testcase>
+<testcase name="apply_validClass_setsLookAndFeel()" classname="ThemeTest" time="0.014">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:ThemeTest]/[method:apply_validClass_setsLookAndFeel()]
+display-name: apply_validClass_setsLookAndFeel()
+]]></system-out>
+</testcase>
+<testcase name="doubleRoundTrip_isIdempotent()" classname="DataStoreTest" time="0.003">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:DataStoreTest]/[method:doubleRoundTrip_isIdempotent()]
+display-name: doubleRoundTrip_isIdempotent()
+]]></system-out>
+</testcase>
+<testcase name="equals_differentId_notEqual()" classname="ThemeTest" time="0.002">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:ThemeTest]/[method:equals_differentId_notEqual()]
+display-name: equals_differentId_notEqual()
+]]></system-out>
+</testcase>
+<testcase name="startup_savedThemeId_isLoaded()" classname="ThemeManagerTest" time="0.001">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:ThemeManagerTest]/[method:startup_savedThemeId_isLoaded()]
+display-name: startup_savedThemeId_isLoaded()
+]]></system-out>
+</testcase>
+<testcase name="apply_classExistsButIsNotLookAndFeel_throwsThemeApplyException()" classname="ThemeTest" time="0.005">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:ThemeTest]/[method:apply_classExistsButIsNotLookAndFeel_throwsThemeApplyException()]
+display-name: apply_classExistsButIsNotLookAndFeel_throwsThemeApplyException()
+]]></system-out>
+</testcase>
+<testcase name="addRowIncreasesRowCount()" classname="SubjectTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:SubjectTest]/[method:addRowIncreasesRowCount()]
+display-name: addRowIncreasesRowCount()
+]]></system-out>
+</testcase>
+<testcase name="apply_bogusClass_throwsThemeApplyException()" classname="ThemeTest" time="0.002">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:ThemeTest]/[method:apply_bogusClass_throwsThemeApplyException()]
+display-name: apply_bogusClass_throwsThemeApplyException()
+]]></system-out>
+</testcase>
+<testcase name="saveAndLoad_emptyModel_producesEmptyModel()" classname="DataStoreTest" time="0.001">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:DataStoreTest]/[method:saveAndLoad_emptyModel_producesEmptyModel()]
+display-name: saveAndLoad_emptyModel_producesEmptyModel()
+]]></system-out>
+</testcase>
+<testcase name="tableModelColumnClassesAreCorrect()" classname="SubjectTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:SubjectTest]/[method:tableModelColumnClassesAreCorrect()]
+display-name: tableModelColumnClassesAreCorrect()
+]]></system-out>
+</testcase>
+<testcase name="saveAndLoad_namesWithTabAndNewline()" classname="DataStoreTest" time="0.001">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:DataStoreTest]/[method:saveAndLoad_namesWithTabAndNewline()]
+display-name: saveAndLoad_namesWithTabAndNewline()
+]]></system-out>
+</testcase>
+<testcase name="toStringReturnsName()" classname="SubjectTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:SubjectTest]/[method:toStringReturnsName()]
+display-name: toStringReturnsName()
+]]></system-out>
+</testcase>
+<testcase name="constructorSetsName()" classname="SubjectTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:SubjectTest]/[method:constructorSetsName()]
+display-name: constructorSetsName()
+]]></system-out>
+</testcase>
+<testcase name="saveAndLoad_doneTrue_preservedCorrectly()" classname="DataStoreTest" time="0.037">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:DataStoreTest]/[method:saveAndLoad_doneTrue_preservedCorrectly()]
+display-name: saveAndLoad_doneTrue_preservedCorrectly()
+]]></system-out>
+</testcase>
+<testcase name="load_noFileExists_leavesModelEmpty()" classname="DataStoreTest" time="0.002">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:DataStoreTest]/[method:load_noFileExists_leavesModelEmpty()]
+display-name: load_noFileExists_leavesModelEmpty()
+]]></system-out>
+</testcase>
+<testcase name="load_emptyFile_leavesModelEmpty()" classname="DataStoreTest" time="0.001">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:DataStoreTest]/[method:load_emptyFile_leavesModelEmpty()]
+display-name: load_emptyFile_leavesModelEmpty()
+]]></system-out>
+</testcase>
+<testcase name="doneCheckboxCanBeToggled()" classname="SubjectTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:SubjectTest]/[method:doneCheckboxCanBeToggled()]
+display-name: doneCheckboxCanBeToggled()
+]]></system-out>
+</testcase>
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]
+display-name: JUnit Jupiter
+]]></system-out>
+</testsuite>

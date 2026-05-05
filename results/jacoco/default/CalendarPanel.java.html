@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CalendarPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AssignmentTracker Test Coverage</a> &gt; <a href="index.source.html" class="el_package">default</a> &gt; <span class="el_source">CalendarPanel.java</span></div><h1>CalendarPanel.java</h1><pre class="source lang-java linenums">import java.awt.*;
+import java.awt.event.*;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.format.TextStyle;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import javax.swing.*;
+import javax.swing.DefaultListModel;
+import javax.swing.table.DefaultTableModel;
+
+/**
+ * Month-view calendar. Reads assignments from the subject list model and
+ * highlights any date that has something due. All colors come from the
+ * current Look &amp; Feel via UIManager so the panel stays in sync with FlatLaf's
+ * light/dark themes.
+ */
+public class CalendarPanel extends JPanel {
+
+<span class="nc" id="L24">    private static final Color DUE_DOT = new Color(239, 68, 68);</span>
+<span class="nc" id="L25">    private static final Color ACCENT  = new Color(99, 102, 241);</span>
+
+    private YearMonth displayedMonth;
+
+    private JLabel monthYearLabel;
+    private JPanel gridPanel;
+
+    /** Source of assignments; may be null for a standalone calendar. */
+    private final DefaultListModel&lt;Subject&gt; subjectModel;
+
+    /** Optional: no assignment data. */
+    public CalendarPanel() {
+<span class="nc" id="L37">        this(null);</span>
+<span class="nc" id="L38">    }</span>
+
+    /**
+     * @param subjectModel list of subjects whose assignments should appear on the calendar
+     */
+<span class="nc" id="L43">    public CalendarPanel(DefaultListModel&lt;Subject&gt; subjectModel) {</span>
+<span class="nc" id="L44">        this.subjectModel = subjectModel;</span>
+<span class="nc" id="L45">        this.displayedMonth = YearMonth.now();</span>
+<span class="nc" id="L46">        setLayout(new BorderLayout());</span>
+<span class="nc" id="L47">        add(buildHeader(), BorderLayout.NORTH);</span>
+<span class="nc" id="L48">        gridPanel = new JPanel();</span>
+<span class="nc" id="L49">        add(gridPanel, BorderLayout.CENTER);</span>
+<span class="nc" id="L50">        rebuildGrid();</span>
+
+        // Rebuild so UIManager colors are re-queried after a theme switch.
+        // Deferred via invokeLater so the rebuild runs AFTER the LAF-swap
+        // listener (and FlatLaf.updateUI) finishes — otherwise cells get
+        // built with the old theme's UIResource colors, which Swing then
+        // overwrites with the new LAF's Panel.background defaults during
+        // updateUI, wiping the today highlight.
+<span class="nc" id="L58">        ThemeManager.get().addListener(() -&gt; SwingUtilities.invokeLater(this::rebuildGrid));</span>
+<span class="nc" id="L59">    }</span>
+
+    /** Rebuilds the grid so newly added/removed assignments show up. */
+    public void refresh() {
+<span class="nc" id="L63">        rebuildGrid();</span>
+<span class="nc" id="L64">    }</span>
+
+    private JPanel buildHeader() {
+<span class="nc" id="L67">        JPanel h = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L68">        h.setOpaque(false);</span>
+<span class="nc" id="L69">        h.setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));</span>
+
+<span class="nc" id="L71">        JButton prevButton = makeNavButton(&quot;\u25C0&quot;);</span>
+<span class="nc" id="L72">        JButton nextButton = makeNavButton(&quot;\u25B6&quot;);</span>
+
+<span class="nc" id="L74">        prevButton.addActionListener(e -&gt; {</span>
+<span class="nc" id="L75">            displayedMonth = displayedMonth.minusMonths(1);</span>
+<span class="nc" id="L76">            rebuildGrid();</span>
+<span class="nc" id="L77">        });</span>
+<span class="nc" id="L78">        nextButton.addActionListener(e -&gt; {</span>
+<span class="nc" id="L79">            displayedMonth = displayedMonth.plusMonths(1);</span>
+<span class="nc" id="L80">            rebuildGrid();</span>
+<span class="nc" id="L81">        });</span>
+
+<span class="nc" id="L83">        monthYearLabel = new JLabel(&quot;&quot;, SwingConstants.CENTER);</span>
+<span class="nc" id="L84">        monthYearLabel.setFont(monthYearLabel.getFont().deriveFont(Font.BOLD, 17f));</span>
+<span class="nc" id="L85">        monthYearLabel.setForeground(ACCENT);</span>
+
+<span class="nc" id="L87">        h.add(prevButton,     BorderLayout.WEST);</span>
+<span class="nc" id="L88">        h.add(monthYearLabel, BorderLayout.CENTER);</span>
+<span class="nc" id="L89">        h.add(nextButton,     BorderLayout.EAST);</span>
+<span class="nc" id="L90">        return h;</span>
+    }
+
+    private JButton makeNavButton(String symbol) {
+<span class="nc" id="L94">        JButton btn = new JButton(symbol);</span>
+<span class="nc" id="L95">        btn.putClientProperty(&quot;JButton.buttonType&quot;, &quot;roundRect&quot;);</span>
+<span class="nc" id="L96">        btn.setFont(btn.getFont().deriveFont(Font.BOLD, 14f));</span>
+<span class="nc" id="L97">        btn.setForeground(ACCENT);</span>
+<span class="nc" id="L98">        return btn;</span>
+    }
+
+    private void rebuildGrid() {
+<span class="nc" id="L102">        String monthName = displayedMonth.getMonth()</span>
+<span class="nc" id="L103">                .getDisplayName(TextStyle.FULL, Locale.getDefault());</span>
+<span class="nc" id="L104">        monthYearLabel.setText(monthName + &quot; &quot; + displayedMonth.getYear());</span>
+
+<span class="nc" id="L106">        Color gridLine = UIManager.getColor(&quot;Component.borderColor&quot;);</span>
+
+<span class="nc" id="L108">        remove(gridPanel);</span>
+<span class="nc" id="L109">        gridPanel = new JPanel(new GridLayout(0, 7, 1, 1));</span>
+<span class="nc" id="L110">        gridPanel.setBackground(gridLine);</span>
+<span class="nc" id="L111">        gridPanel.setBorder(BorderFactory.createLineBorder(gridLine));</span>
+
+<span class="nc" id="L113">        addDayNameRow();</span>
+<span class="nc" id="L114">        addDateCells(collectDueDates());</span>
+
+<span class="nc" id="L116">        add(gridPanel, BorderLayout.CENTER);</span>
+<span class="nc" id="L117">        revalidate();</span>
+<span class="nc" id="L118">        repaint();</span>
+<span class="nc" id="L119">    }</span>
+
+    private void addDayNameRow() {
+<span class="nc" id="L122">        Color bg = UIManager.getColor(&quot;TableHeader.background&quot;);</span>
+<span class="nc" id="L123">        Color fg = UIManager.getColor(&quot;TableHeader.foreground&quot;);</span>
+<span class="nc" id="L124">        String[] dayNames = {&quot;Sun&quot;, &quot;Mon&quot;, &quot;Tue&quot;, &quot;Wed&quot;, &quot;Thu&quot;, &quot;Fri&quot;, &quot;Sat&quot;};</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">        for (String name : dayNames) {</span>
+<span class="nc" id="L126">            JLabel label = new JLabel(name, SwingConstants.CENTER);</span>
+<span class="nc" id="L127">            label.setOpaque(true);</span>
+<span class="nc" id="L128">            label.setBackground(bg);</span>
+<span class="nc" id="L129">            label.setForeground(fg);</span>
+<span class="nc" id="L130">            label.setFont(label.getFont().deriveFont(Font.BOLD, 12f));</span>
+<span class="nc" id="L131">            label.setBorder(BorderFactory.createEmptyBorder(6, 0, 6, 0));</span>
+<span class="nc" id="L132">            gridPanel.add(label);</span>
+        }
+<span class="nc" id="L134">    }</span>
+
+    /**
+     * Walks every subject and every row in its table model, parsing the
+     * &quot;Due Date&quot; column into a LocalDate. Rows with an empty or unparseable
+     * date are silently skipped — students shouldn't see a crash for a typo.
+     *
+     * @return map of date -&gt; list of &quot;Subject: Assignment&quot; strings due that day
+     */
+    private Map&lt;LocalDate, List&lt;String&gt;&gt; collectDueDates() {
+<span class="nc" id="L144">        Map&lt;LocalDate, List&lt;String&gt;&gt; byDate = new HashMap&lt;&gt;();</span>
+<span class="nc bnc" id="L145" title="All 2 branches missed.">        if (subjectModel == null) return byDate;</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        for (int i = 0; i &lt; subjectModel.size(); i++) {</span>
+<span class="nc" id="L147">            Subject subject = subjectModel.get(i);</span>
+<span class="nc" id="L148">            DefaultTableModel dtm = subject.getTableModel();</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">            for (int r = 0; r &lt; dtm.getRowCount(); r++) {</span>
+<span class="nc" id="L150">                Object dateCell = dtm.getValueAt(r, 1);</span>
+<span class="nc" id="L151">                Object nameCell = dtm.getValueAt(r, 0);</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">                if (!(dateCell instanceof String)) continue;</span>
+<span class="nc" id="L153">                String raw = ((String) dateCell).trim();</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">                if (raw.isEmpty()) continue;</span>
+                try {
+<span class="nc" id="L156">                    LocalDate d = parseDate(raw);</span>
+<span class="nc bnc" id="L157" title="All 2 branches missed.">                    if (d == null) continue;</span>
+<span class="nc" id="L158">                    String lbl = subject.getName() + &quot;: &quot; + nameCell;</span>
+<span class="nc" id="L159">                    byDate.computeIfAbsent(d, k -&gt; new ArrayList&lt;&gt;()).add(lbl);</span>
+<span class="nc" id="L160">                } catch (DateTimeParseException ignored) {</span>
+                    // Skip malformed dates rather than failing the whole render.
+<span class="nc" id="L162">                }</span>
+            }
+        }
+<span class="nc" id="L165">        return byDate;</span>
+    }
+
+    /**
+     * Parses a date string in either MM/dd/yyyy or yyyy-MM-dd format.
+     * Returns null if the string doesn't match either format.
+     */
+    private static LocalDate parseDate(String raw) {
+        try {
+<span class="nc" id="L174">            return LocalDate.parse(raw, DateTimeFormatter.ofPattern(&quot;MM/dd/yyyy&quot;));</span>
+<span class="nc" id="L175">        } catch (DateTimeParseException ignored) { }</span>
+        try {
+<span class="nc" id="L177">            return LocalDate.parse(raw); // yyyy-MM-dd fallback for existing data</span>
+<span class="nc" id="L178">        } catch (DateTimeParseException ignored) { }</span>
+<span class="nc" id="L179">        return null;</span>
+    }
+
+    private void addDateCells(Map&lt;LocalDate, List&lt;String&gt;&gt; dueByDate) {
+<span class="nc" id="L183">        LocalDate today        = LocalDate.now();</span>
+<span class="nc" id="L184">        LocalDate firstOfMonth = displayedMonth.atDay(1);</span>
+
+        // DayOfWeek: MON=1..SUN=7. We want Sun=0..Sat=6 so grid starts on Sunday.
+<span class="nc" id="L187">        int startOffset = firstOfMonth.getDayOfWeek().getValue() % 7;</span>
+
+<span class="nc" id="L189">        LocalDate cellDate = firstOfMonth.minusDays(startOffset);</span>
+
+<span class="nc bnc" id="L191" title="All 2 branches missed.">        for (int i = 0; i &lt; 42; i++) {</span>
+<span class="nc" id="L192">            boolean isThisMonth = YearMonth.from(cellDate).equals(displayedMonth);</span>
+<span class="nc" id="L193">            boolean isToday     = cellDate.equals(today);</span>
+<span class="nc" id="L194">            List&lt;String&gt; due    = dueByDate.get(cellDate);</span>
+<span class="nc" id="L195">            gridPanel.add(buildDateCell(cellDate, isThisMonth, isToday, due));</span>
+<span class="nc" id="L196">            cellDate = cellDate.plusDays(1);</span>
+        }
+<span class="nc" id="L198">    }</span>
+
+    private JPanel buildDateCell(LocalDate date, boolean isThisMonth,
+                                 boolean isToday, List&lt;String&gt; due) {
+<span class="nc" id="L202">        Color thisMonthBg  = UIManager.getColor(&quot;Table.background&quot;);</span>
+<span class="nc" id="L203">        Color otherMonthBg = UIManager.getColor(&quot;Panel.background&quot;);</span>
+<span class="nc" id="L204">        Color todayBg      = UIManager.getColor(&quot;Table.selectionBackground&quot;);</span>
+<span class="nc" id="L205">        Color todayFg      = UIManager.getColor(&quot;Table.selectionForeground&quot;);</span>
+<span class="nc" id="L206">        Color normalFg     = UIManager.getColor(&quot;Label.foreground&quot;);</span>
+<span class="nc" id="L207">        Color mutedFg      = UIManager.getColor(&quot;Label.disabledForeground&quot;);</span>
+<span class="nc" id="L208">        Color hoverBorder  = UIManager.getColor(&quot;Component.focusColor&quot;);</span>
+
+<span class="nc" id="L210">        JPanel cell = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L211">        cell.setBorder(BorderFactory.createEmptyBorder(4, 6, 4, 6));</span>
+<span class="nc" id="L212">        cell.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));</span>
+
+<span class="nc bnc" id="L214" title="All 2 branches missed.">        if (isToday) {</span>
+<span class="nc" id="L215">            cell.setBackground(todayBg);</span>
+<span class="nc bnc" id="L216" title="All 2 branches missed.">        } else if (isThisMonth) {</span>
+<span class="nc" id="L217">            cell.setBackground(thisMonthBg);</span>
+        } else {
+<span class="nc" id="L219">            cell.setBackground(otherMonthBg);</span>
+        }
+
+<span class="nc" id="L222">        JLabel dateLabel = new JLabel(String.valueOf(date.getDayOfMonth()));</span>
+<span class="nc bnc" id="L223" title="All 2 branches missed.">        dateLabel.setFont(dateLabel.getFont().deriveFont(isToday ? Font.BOLD : Font.PLAIN, 13f));</span>
+<span class="nc bnc" id="L224" title="All 4 branches missed.">        dateLabel.setForeground(isToday ? todayFg : (isThisMonth ? normalFg : mutedFg));</span>
+<span class="nc" id="L225">        cell.add(dateLabel, BorderLayout.NORTH);</span>
+
+        // Show a small dot and a count when this date has assignments due.
+<span class="nc bnc" id="L228" title="All 4 branches missed.">        if (due != null &amp;&amp; !due.isEmpty()) {</span>
+<span class="nc" id="L229">            JLabel marker = new JLabel(&quot;\u25CF &quot; + due.size(), SwingConstants.CENTER);</span>
+<span class="nc" id="L230">            marker.setForeground(DUE_DOT);</span>
+<span class="nc" id="L231">            marker.setFont(marker.getFont().deriveFont(Font.BOLD, 11f));</span>
+<span class="nc" id="L232">            cell.add(marker, BorderLayout.CENTER);</span>
+<span class="nc" id="L233">            cell.setToolTipText(tooltipFor(due));</span>
+        }
+
+<span class="nc" id="L236">        cell.addMouseListener(new MouseAdapter() {</span>
+            @Override
+            public void mouseEntered(MouseEvent e) {
+<span class="nc" id="L239">                cell.setBorder(BorderFactory.createLineBorder(hoverBorder, 2));</span>
+<span class="nc" id="L240">            }</span>
+            @Override
+            public void mouseExited(MouseEvent e) {
+<span class="nc" id="L243">                cell.setBorder(BorderFactory.createEmptyBorder(4, 6, 4, 6));</span>
+<span class="nc" id="L244">            }</span>
+        });
+
+<span class="nc" id="L247">        return cell;</span>
+    }
+
+    private static String tooltipFor(List&lt;String&gt; due) {
+        // HTML tooltip so each assignment lands on its own line.
+<span class="nc" id="L252">        StringBuilder sb = new StringBuilder(&quot;&lt;html&gt;&quot;);</span>
+<span class="nc bnc" id="L253" title="All 2 branches missed.">        for (int i = 0; i &lt; due.size(); i++) {</span>
+<span class="nc bnc" id="L254" title="All 2 branches missed.">            if (i &gt; 0) sb.append(&quot;&lt;br&gt;&quot;);</span>
+<span class="nc" id="L255">            sb.append(escapeHtml(due.get(i)));</span>
+        }
+<span class="nc" id="L257">        sb.append(&quot;&lt;/html&gt;&quot;);</span>
+<span class="nc" id="L258">        return sb.toString();</span>
+    }
+
+    private static String escapeHtml(String s) {
+<span class="nc" id="L262">        return s.replace(&quot;&amp;&quot;, &quot;&amp;amp;&quot;)</span>
+<span class="nc" id="L263">                .replace(&quot;&lt;&quot;, &quot;&amp;lt;&quot;)</span>
+<span class="nc" id="L264">                .replace(&quot;&gt;&quot;, &quot;&amp;gt;&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

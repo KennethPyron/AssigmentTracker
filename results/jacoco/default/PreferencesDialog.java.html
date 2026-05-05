@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PreferencesDialog.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AssignmentTracker Test Coverage</a> &gt; <a href="index.source.html" class="el_package">default</a> &gt; <span class="el_source">PreferencesDialog.java</span></div><h1>PreferencesDialog.java</h1><pre class="source lang-java linenums">import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import java.awt.*;
+import java.lang.ref.WeakReference;
+
+/**
+ * Non-modal Preferences dialog containing a theme picker. Selection applies
+ * live via {@link ThemeManager#setCurrent(Theme)}; closing the dialog
+ * persists nothing extra.
+ */
+public final class PreferencesDialog extends JDialog {
+
+<span class="nc" id="L13">    private static WeakReference&lt;PreferencesDialog&gt; activeRef = new WeakReference&lt;&gt;(null);</span>
+
+    /**
+     * Show the dialog, bringing the existing instance to front if it's
+     * already visible (preserves scroll / selection).
+     */
+    public static void show(Window owner) {
+<span class="nc" id="L20">        PreferencesDialog existing = activeRef.get();</span>
+<span class="nc bnc" id="L21" title="All 6 branches missed.">        if (existing != null &amp;&amp; existing.isDisplayable() &amp;&amp; existing.isVisible()) {</span>
+<span class="nc" id="L22">            existing.toFront();</span>
+<span class="nc" id="L23">            existing.requestFocus();</span>
+<span class="nc" id="L24">            return;</span>
+        }
+<span class="nc" id="L26">        PreferencesDialog dlg = new PreferencesDialog(owner);</span>
+<span class="nc" id="L27">        activeRef = new WeakReference&lt;&gt;(dlg);</span>
+<span class="nc" id="L28">        dlg.setVisible(true);</span>
+<span class="nc" id="L29">    }</span>
+
+    private PreferencesDialog(Window owner) {
+<span class="nc" id="L32">        super(owner, &quot;Preferences&quot;, ModalityType.MODELESS);</span>
+<span class="nc" id="L33">        setDefaultCloseOperation(DISPOSE_ON_CLOSE);</span>
+<span class="nc" id="L34">        setSize(360, 420);</span>
+<span class="nc" id="L35">        setLocationRelativeTo(owner);</span>
+
+<span class="nc" id="L37">        JComponent themeSection = buildThemeSection();</span>
+
+<span class="nc" id="L39">        JButton close = new JButton(&quot;Close&quot;);</span>
+<span class="nc" id="L40">        close.putClientProperty(&quot;JButton.buttonType&quot;, &quot;roundRect&quot;);</span>
+<span class="nc" id="L41">        close.addActionListener(e -&gt; dispose());</span>
+
+<span class="nc" id="L43">        JPanel buttonBar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 6));</span>
+<span class="nc" id="L44">        buttonBar.add(close);</span>
+
+<span class="nc" id="L46">        JPanel content = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L47">        content.setBorder(BorderFactory.createEmptyBorder(12, 12, 8, 12));</span>
+<span class="nc" id="L48">        content.add(themeSection, BorderLayout.CENTER);</span>
+<span class="nc" id="L49">        content.add(buttonBar, BorderLayout.SOUTH);</span>
+
+<span class="nc" id="L51">        setContentPane(content);</span>
+<span class="nc" id="L52">    }</span>
+
+    /**
+     * Self-contained — when a future &quot;Colors&quot; or &quot;Fonts&quot; section lands,
+     * wrap this in a JTabbedPane.
+     */
+    private JComponent buildThemeSection() {
+<span class="nc" id="L59">        JLabel title = new JLabel(&quot;Theme&quot;);</span>
+<span class="nc" id="L60">        title.setFont(title.getFont().deriveFont(Font.BOLD, 13f));</span>
+<span class="nc" id="L61">        title.setBorder(BorderFactory.createEmptyBorder(0, 0, 8, 0));</span>
+
+<span class="nc" id="L63">        DefaultListModel&lt;Theme&gt; model = new DefaultListModel&lt;&gt;();</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">        for (Theme t : ThemeManager.get().presets()) model.addElement(t);</span>
+
+<span class="nc" id="L66">        JList&lt;Theme&gt; list = new JList&lt;&gt;(model);</span>
+<span class="nc" id="L67">        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);</span>
+<span class="nc" id="L68">        list.setCellRenderer(new ThemeCellRenderer());</span>
+<span class="nc" id="L69">        list.setSelectedValue(ThemeManager.get().current(), true);</span>
+<span class="nc" id="L70">        list.addListSelectionListener((ListSelectionEvent e) -&gt; {</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">            if (e.getValueIsAdjusting()) return;</span>
+<span class="nc" id="L72">            Theme selected = list.getSelectedValue();</span>
+<span class="nc bnc" id="L73" title="All 4 branches missed.">            if (selected != null &amp;&amp; !selected.equals(ThemeManager.get().current())) {</span>
+<span class="nc" id="L74">                ThemeManager.get().setCurrent(selected);</span>
+            }
+<span class="nc" id="L76">        });</span>
+
+<span class="nc" id="L78">        JScrollPane scroll = new JScrollPane(list);</span>
+<span class="nc" id="L79">        scroll.setBorder(BorderFactory.createLineBorder(</span>
+<span class="nc" id="L80">                UIManager.getColor(&quot;Component.borderColor&quot;)));</span>
+
+<span class="nc" id="L82">        JPanel section = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L83">        section.add(title, BorderLayout.NORTH);</span>
+<span class="nc" id="L84">        section.add(scroll, BorderLayout.CENTER);</span>
+<span class="nc" id="L85">        return section;</span>
+    }
+
+    /** Renders each row as [swatch] displayName. */
+    private static final class ThemeCellRenderer extends DefaultListCellRenderer {
+        @Override
+        public Component getListCellRendererComponent(JList&lt;?&gt; list, Object value,
+                                                      int index, boolean isSelected,
+                                                      boolean cellHasFocus) {
+<span class="nc" id="L94">            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">            if (value instanceof Theme) {</span>
+<span class="nc" id="L96">                Theme t = (Theme) value;</span>
+<span class="nc" id="L97">                setText(&quot;    &quot; + t.displayName());</span>
+<span class="nc" id="L98">                setIcon(new SwatchIcon(swatchColor(t)));</span>
+<span class="nc" id="L99">                setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));</span>
+            }
+<span class="nc" id="L101">            return this;</span>
+        }
+
+        private static Color swatchColor(Theme t) {
+<span class="nc bnc" id="L105" title="All 2 branches missed.">            if (t.accent() != null) return t.accent();</span>
+            // No accent override → use a neutral indicator based on light/dark.
+<span class="nc bnc" id="L107" title="All 2 branches missed.">            return t.isDark() ? new Color(60, 60, 60) : new Color(220, 220, 220);</span>
+        }
+    }
+
+    private static final class SwatchIcon implements Icon {
+        private final Color color;
+<span class="nc" id="L113">        SwatchIcon(Color color) { this.color = color; }</span>
+<span class="nc" id="L114">        public int getIconWidth()  { return 12; }</span>
+<span class="nc" id="L115">        public int getIconHeight() { return 12; }</span>
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+<span class="nc" id="L117">            Graphics2D g2 = (Graphics2D) g.create();</span>
+<span class="nc" id="L118">            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,</span>
+                    RenderingHints.VALUE_ANTIALIAS_ON);
+<span class="nc" id="L120">            g2.setColor(color);</span>
+<span class="nc" id="L121">            g2.fillRoundRect(x, y, getIconWidth(), getIconHeight(), 4, 4);</span>
+<span class="nc" id="L122">            g2.setColor(new Color(0, 0, 0, 60));</span>
+<span class="nc" id="L123">            g2.drawRoundRect(x, y, getIconWidth() - 1, getIconHeight() - 1, 4, 4);</span>
+<span class="nc" id="L124">            g2.dispose();</span>
+<span class="nc" id="L125">        }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

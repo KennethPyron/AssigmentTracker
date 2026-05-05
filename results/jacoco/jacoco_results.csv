@@ -1,0 +1,23 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+AssignmentTracker Test Coverage,default,CalendarPanel,640,0,34,0,137,0,35,0,18,0
+AssignmentTracker Test Coverage,default,CalendarPanel.new MouseAdapter() {...},26,0,0,0,5,0,3,0,3,0
+AssignmentTracker Test Coverage,default,PreferencesDialog.SwatchIcon,58,0,0,0,11,0,4,0,4,0
+AssignmentTracker Test Coverage,default,Subject.new DefaultTableModel() {...},0,15,0,2,0,2,0,3,0,2
+AssignmentTracker Test Coverage,default,Main.new DocumentListener() {...},18,0,0,0,4,0,4,0,4,0
+AssignmentTracker Test Coverage,default,DatePickerDialog,513,0,22,0,109,0,22,0,11,0
+AssignmentTracker Test Coverage,default,Main.new RowFilter() {...},97,0,22,0,15,0,13,0,2,0
+AssignmentTracker Test Coverage,default,ThemeApplyException,0,5,0,0,0,2,0,1,0,1
+AssignmentTracker Test Coverage,default,Main.new ListDataListener() {...},72,0,6,0,10,0,7,0,4,0
+AssignmentTracker Test Coverage,default,PreferencesDialog,217,0,14,0,48,0,13,0,6,0
+AssignmentTracker Test Coverage,default,Main.new DefaultTableModel() {...},12,0,2,0,2,0,3,0,2,0
+AssignmentTracker Test Coverage,default,NotificationService,654,0,36,0,138,0,30,0,12,0
+AssignmentTracker Test Coverage,default,DatePickerDialog.new MouseAdapter() {...},43,0,0,0,8,0,4,0,4,0
+AssignmentTracker Test Coverage,default,Main.new WindowAdapter() {...},16,0,0,0,4,0,2,0,2,0
+AssignmentTracker Test Coverage,default,ThemeManager,8,258,0,18,2,39,0,21,0,12
+AssignmentTracker Test Coverage,default,PreferencesDialog.ThemeCellRenderer,58,0,6,0,9,0,5,0,2,0
+AssignmentTracker Test Coverage,default,Subject,0,44,0,0,0,8,0,5,0,5
+AssignmentTracker Test Coverage,default,DataStore,76,630,21,77,18,130,22,43,2,10
+AssignmentTracker Test Coverage,default,Theme,7,87,2,2,1,25,3,9,1,9
+AssignmentTracker Test Coverage,default,Main,1699,0,56,0,341,0,47,0,19,0
+AssignmentTracker Test Coverage,default,NotesPanel.new ListSelectionListener() {...},13,0,2,0,3,0,3,0,2,0
+AssignmentTracker Test Coverage,default,NotesPanel,243,0,10,0,54,0,11,0,6,0

@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DataStore.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AssignmentTracker Test Coverage</a> &gt; <a href="index.source.html" class="el_package">default</a> &gt; <span class="el_source">DataStore.java</span></div><h1>DataStore.java</h1><pre class="source lang-java linenums">import javax.swing.DefaultListModel;
+import javax.swing.table.DefaultTableModel;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
+import java.util.ArrayList;
+import java.util.List;
+
+class DataStore {
+<span class="fc" id="L10">    private static Path DATA_FILE = Paths.get(</span>
+<span class="fc" id="L11">            System.getProperty(&quot;user.home&quot;), &quot;.assignmenttracker_data.json&quot;);</span>
+<span class="fc" id="L12">    private static final Path SCRATCHPAD_FILE = Paths.get(</span>
+<span class="fc" id="L13">            System.getProperty(&quot;user.home&quot;), &quot;.assignmenttracker_notes.txt&quot;);</span>
+
+    private DataStore() { }
+
+    static String loadScratchpad() {
+<span class="nc bnc" id="L18" title="All 2 branches missed.">        if (!Files.exists(SCRATCHPAD_FILE)) return &quot;&quot;;</span>
+        try {
+<span class="nc" id="L20">            return new String(Files.readAllBytes(SCRATCHPAD_FILE), StandardCharsets.UTF_8);</span>
+<span class="nc" id="L21">        } catch (IOException e) {</span>
+<span class="nc" id="L22">            System.err.println(&quot;Could not load scratchpad: &quot; + e.getMessage());</span>
+<span class="nc" id="L23">            return &quot;&quot;;</span>
+        }
+    }
+
+    static void saveScratchpad(String text) {
+        try {
+<span class="nc" id="L29">            Files.write(SCRATCHPAD_FILE, text.getBytes(StandardCharsets.UTF_8));</span>
+<span class="nc" id="L30">        } catch (IOException e) {</span>
+<span class="nc" id="L31">            System.err.println(&quot;Could not save scratchpad: &quot; + e.getMessage());</span>
+<span class="nc" id="L32">        }</span>
+<span class="nc" id="L33">    }</span>
+
+    static void setDataFile(Path path) {
+<span class="fc" id="L36">        DATA_FILE = path;</span>
+<span class="fc" id="L37">    }</span>
+
+    static void save(DefaultListModel&lt;Subject&gt; model) {
+<span class="fc" id="L40">        StringBuilder sb = new StringBuilder();</span>
+<span class="fc" id="L41">        sb.append(&quot;[\n&quot;);</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">        for (int i = 0; i &lt; model.size(); i++) {</span>
+<span class="fc" id="L43">            Subject s = model.get(i);</span>
+<span class="fc" id="L44">            sb.append(&quot;  {\n&quot;);</span>
+<span class="fc" id="L45">            sb.append(&quot;    \&quot;name\&quot;: &quot;).append(jsonString(s.getName())).append(&quot;,\n&quot;);</span>
+<span class="fc" id="L46">            sb.append(&quot;    \&quot;assignments\&quot;: [\n&quot;);</span>
+<span class="fc" id="L47">            DefaultTableModel tm = s.getTableModel();</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">            for (int r = 0; r &lt; tm.getRowCount(); r++) {</span>
+<span class="fc" id="L49">                String aName = (String)  tm.getValueAt(r, 0);</span>
+<span class="fc" id="L50">                String date  = (String)  tm.getValueAt(r, 1);</span>
+<span class="fc" id="L51">                Boolean done = (Boolean) tm.getValueAt(r, 2);</span>
+<span class="fc" id="L52">                String notes = (String)  tm.getValueAt(r, 3);</span>
+<span class="fc" id="L53">                sb.append(&quot;      {\&quot;name\&quot;: &quot;).append(jsonString(aName))</span>
+<span class="fc" id="L54">                  .append(&quot;, \&quot;date\&quot;: &quot;).append(jsonString(date))</span>
+<span class="pc bpc" id="L55" title="1 of 4 branches missed.">                  .append(&quot;, \&quot;done\&quot;: &quot;).append(done != null &amp;&amp; done)</span>
+<span class="fc" id="L56">                  .append(&quot;, \&quot;notes\&quot;: &quot;).append(jsonString(notes))</span>
+<span class="fc" id="L57">                  .append(&quot;}&quot;);</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">                if (r &lt; tm.getRowCount() - 1) sb.append(&quot;,&quot;);</span>
+<span class="fc" id="L59">                sb.append(&quot;\n&quot;);</span>
+            }
+<span class="fc" id="L61">            sb.append(&quot;    ]\n&quot;);</span>
+<span class="fc" id="L62">            sb.append(&quot;  }&quot;);</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">            if (i &lt; model.size() - 1) sb.append(&quot;,&quot;);</span>
+<span class="fc" id="L64">            sb.append(&quot;\n&quot;);</span>
+        }
+<span class="fc" id="L66">        sb.append(&quot;]\n&quot;);</span>
+        try {
+<span class="fc" id="L68">            Files.write(DATA_FILE, sb.toString().getBytes(StandardCharsets.UTF_8));</span>
+<span class="nc" id="L69">        } catch (IOException e) {</span>
+<span class="nc" id="L70">            System.err.println(&quot;Could not save data: &quot; + e.getMessage());</span>
+<span class="fc" id="L71">        }</span>
+<span class="fc" id="L72">    }</span>
+
+    static void load(DefaultListModel&lt;Subject&gt; model) {
+<span class="fc bfc" id="L75" title="All 2 branches covered.">        if (!Files.exists(DATA_FILE)) return;</span>
+        try {
+<span class="fc" id="L77">            String json = new String(Files.readAllBytes(DATA_FILE), StandardCharsets.UTF_8).trim();</span>
+<span class="fc" id="L78">            List&lt;Subject&gt; subjects = parseSubjects(json);</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">            for (Subject s : subjects) model.addElement(s);</span>
+<span class="nc" id="L80">        } catch (IOException | IllegalArgumentException e) {</span>
+<span class="nc" id="L81">            System.err.println(&quot;Could not load data: &quot; + e.getMessage());</span>
+<span class="fc" id="L82">        }</span>
+<span class="fc" id="L83">    }</span>
+
+    private static List&lt;Subject&gt; parseSubjects(String json) {
+<span class="fc" id="L86">        List&lt;Subject&gt; result = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L87">        json = json.trim();</span>
+<span class="fc bfc" id="L88" title="All 2 branches covered.">        if (!json.startsWith(&quot;[&quot;)) return result;</span>
+<span class="fc" id="L89">        json = json.substring(1, json.length() - 1).trim();</span>
+<span class="fc" id="L90">        List&lt;String&gt; objects = splitTopLevelObjects(json);</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        for (String obj : objects) {</span>
+<span class="fc" id="L92">            String name = extractStringField(obj, &quot;name&quot;);</span>
+<span class="fc" id="L93">            Subject s = new Subject(name);</span>
+<span class="fc" id="L94">            String assignmentsBlock = extractArrayBlock(obj, &quot;assignments&quot;);</span>
+<span class="pc bpc" id="L95" title="1 of 2 branches missed.">            if (assignmentsBlock != null) {</span>
+<span class="fc" id="L96">                List&lt;String&gt; rows = splitTopLevelObjects(assignmentsBlock);</span>
+<span class="fc bfc" id="L97" title="All 2 branches covered.">                for (String row : rows) {</span>
+<span class="fc" id="L98">                    String aName = extractStringField(row, &quot;name&quot;);</span>
+<span class="fc" id="L99">                    String date  = extractStringField(row, &quot;date&quot;);</span>
+<span class="fc" id="L100">                    boolean done = extractBoolField(row, &quot;done&quot;);</span>
+<span class="fc" id="L101">                    String notes = extractStringField(row, &quot;notes&quot;);</span>
+<span class="fc" id="L102">                    s.getTableModel().addRow(new Object[]{aName, date, done, notes});</span>
+<span class="fc" id="L103">                }</span>
+            }
+<span class="fc" id="L105">            result.add(s);</span>
+<span class="fc" id="L106">        }</span>
+<span class="fc" id="L107">        return result;</span>
+    }
+
+    private static List&lt;String&gt; splitTopLevelObjects(String body) {
+<span class="fc" id="L111">        List&lt;String&gt; parts = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L112">        int depth = 0;</span>
+<span class="fc" id="L113">        int start = -1;</span>
+<span class="fc bfc" id="L114" title="All 2 branches covered.">        for (int i = 0; i &lt; body.length(); i++) {</span>
+<span class="fc" id="L115">            char c = body.charAt(i);</span>
+<span class="fc bfc" id="L116" title="All 2 branches covered.">            if (c == '{') {</span>
+<span class="fc bfc" id="L117" title="All 2 branches covered.">                if (depth == 0) start = i;</span>
+<span class="fc" id="L118">                depth++;</span>
+<span class="fc bfc" id="L119" title="All 2 branches covered.">            } else if (c == '}') {</span>
+<span class="fc" id="L120">                depth--;</span>
+<span class="pc bpc" id="L121" title="1 of 4 branches missed.">                if (depth == 0 &amp;&amp; start &gt;= 0) {</span>
+<span class="fc" id="L122">                    parts.add(body.substring(start, i + 1));</span>
+<span class="fc" id="L123">                    start = -1;</span>
+                }
+            }
+        }
+<span class="fc" id="L127">        return parts;</span>
+    }
+
+    private static String extractStringField(String obj, String key) {
+<span class="fc" id="L131">        String search = &quot;\&quot;&quot; + key + &quot;\&quot;&quot;;</span>
+<span class="fc" id="L132">        int idx = obj.indexOf(search);</span>
+<span class="pc bpc" id="L133" title="1 of 2 branches missed.">        if (idx &lt; 0) return &quot;&quot;;</span>
+<span class="fc" id="L134">        idx += search.length();</span>
+<span class="pc bpc" id="L135" title="1 of 6 branches missed.">        while (idx &lt; obj.length() &amp;&amp; (obj.charAt(idx) == ' ' || obj.charAt(idx) == ':')) idx++;</span>
+<span class="pc bpc" id="L136" title="2 of 4 branches missed.">        if (idx &gt;= obj.length() || obj.charAt(idx) != '&quot;') return &quot;&quot;;</span>
+<span class="fc" id="L137">        idx++;</span>
+<span class="fc" id="L138">        StringBuilder sb = new StringBuilder();</span>
+<span class="pc bpc" id="L139" title="1 of 2 branches missed.">        while (idx &lt; obj.length()) {</span>
+<span class="fc" id="L140">            char c = obj.charAt(idx);</span>
+<span class="pc bpc" id="L141" title="1 of 4 branches missed.">            if (c == '\\' &amp;&amp; idx + 1 &lt; obj.length()) {</span>
+<span class="fc" id="L142">                idx++;</span>
+<span class="fc" id="L143">                char esc = obj.charAt(idx);</span>
+<span class="pc bpc" id="L144" title="2 of 6 branches missed.">                switch (esc) {</span>
+<span class="fc" id="L145">                    case '&quot;':  sb.append('&quot;');  break;</span>
+<span class="fc" id="L146">                    case '\\': sb.append('\\'); break;</span>
+<span class="fc" id="L147">                    case 'n':  sb.append('\n'); break;</span>
+<span class="nc" id="L148">                    case 'r':  sb.append('\r'); break;</span>
+<span class="fc" id="L149">                    case 't':  sb.append('\t'); break;</span>
+<span class="nc" id="L150">                    default:   sb.append(esc);</span>
+                }
+<span class="fc bfc" id="L152" title="All 2 branches covered.">            } else if (c == '&quot;') {</span>
+<span class="fc" id="L153">                break;</span>
+            } else {
+<span class="fc" id="L155">                sb.append(c);</span>
+            }
+<span class="fc" id="L157">            idx++;</span>
+<span class="fc" id="L158">        }</span>
+<span class="fc" id="L159">        return sb.toString();</span>
+    }
+
+    private static boolean extractBoolField(String obj, String key) {
+<span class="fc" id="L163">        String search = &quot;\&quot;&quot; + key + &quot;\&quot;&quot;;</span>
+<span class="fc" id="L164">        int idx = obj.indexOf(search);</span>
+<span class="pc bpc" id="L165" title="1 of 2 branches missed.">        if (idx &lt; 0) return false;</span>
+<span class="fc" id="L166">        idx += search.length();</span>
+<span class="pc bpc" id="L167" title="1 of 6 branches missed.">        while (idx &lt; obj.length() &amp;&amp; (obj.charAt(idx) == ' ' || obj.charAt(idx) == ':')) idx++;</span>
+<span class="fc" id="L168">        return obj.startsWith(&quot;true&quot;, idx);</span>
+    }
+
+    private static String extractArrayBlock(String obj, String key) {
+<span class="fc" id="L172">        String search = &quot;\&quot;&quot; + key + &quot;\&quot;&quot;;</span>
+<span class="fc" id="L173">        int idx = obj.indexOf(search);</span>
+<span class="pc bpc" id="L174" title="1 of 2 branches missed.">        if (idx &lt; 0) return null;</span>
+<span class="fc" id="L175">        idx += search.length();</span>
+<span class="pc bpc" id="L176" title="1 of 4 branches missed.">        while (idx &lt; obj.length() &amp;&amp; obj.charAt(idx) != '[') idx++;</span>
+<span class="pc bpc" id="L177" title="1 of 2 branches missed.">        if (idx &gt;= obj.length()) return null;</span>
+<span class="fc" id="L178">        int depth = 0;</span>
+<span class="fc" id="L179">        int start = idx;</span>
+<span class="pc bpc" id="L180" title="1 of 2 branches missed.">        for (int i = idx; i &lt; obj.length(); i++) {</span>
+<span class="fc" id="L181">            char c = obj.charAt(i);</span>
+<span class="fc bfc" id="L182" title="All 2 branches covered.">            if (c == '[') depth++;</span>
+<span class="fc bfc" id="L183" title="All 2 branches covered.">            else if (c == ']') {</span>
+<span class="fc" id="L184">                depth--;</span>
+<span class="pc bpc" id="L185" title="1 of 2 branches missed.">                if (depth == 0) return obj.substring(start + 1, i);</span>
+            }
+        }
+<span class="nc" id="L188">        return null;</span>
+    }
+
+    private static String jsonString(String s) {
+<span class="fc bfc" id="L192" title="All 2 branches covered.">        if (s == null) return &quot;\&quot;\&quot;&quot;;</span>
+<span class="fc" id="L193">        StringBuilder sb = new StringBuilder(&quot;\&quot;&quot;);</span>
+<span class="fc bfc" id="L194" title="All 2 branches covered.">        for (char c : s.toCharArray()) {</span>
+<span class="pc bpc" id="L195" title="1 of 6 branches missed.">            switch (c) {</span>
+<span class="fc" id="L196">                case '&quot;':  sb.append(&quot;\\\&quot;&quot;); break;</span>
+<span class="fc" id="L197">                case '\\': sb.append(&quot;\\\\&quot;); break;</span>
+<span class="fc" id="L198">                case '\n': sb.append(&quot;\\n&quot;);  break;</span>
+<span class="nc" id="L199">                case '\r': sb.append(&quot;\\r&quot;);  break;</span>
+<span class="fc" id="L200">                case '\t': sb.append(&quot;\\t&quot;);  break;</span>
+<span class="fc" id="L201">                default:   sb.append(c);</span>
+            }
+        }
+<span class="fc" id="L204">        sb.append(&quot;\&quot;&quot;);</span>
+<span class="fc" id="L205">        return sb.toString();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

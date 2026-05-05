@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="MyAntApp" default="package" basedir=".">
+<project name="MyAntApp" default="package" basedir="."
+         xmlns:jacoco="antlib:org.jacoco.ant">
+
+  <property file="build.properties"/>
 
   <property name="app.name"    value="AssignmentTracker"/>
   <property name="app.version" value="1.2.1"/>
@@ -254,6 +257,147 @@
       <arg value="--class-path"/><arg value="${build.dir}${path.separator}${test.build}${path.separator}${flatlaf.jar}${path.separator}${flatlaf-themes.jar}"/>
       <arg value="--scan-class-path=${test.build}"/>
     </java>
+  </target>
+
+  <!-- ====================== Quality Tool Definitions ====================== -->
+
+  <taskdef resource="com/puppycrawl/tools/checkstyle/ant/checkstyle-ant-task.properties"
+           classpath="${tool.jars}/checkstyle-13.3.0-all.jar"/>
+
+  <path id="pmd.path">
+    <fileset dir="${pmd.home}/lib">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+  <taskdef name="pmd" classname="net.sourceforge.pmd.ant.PMDTask"
+           classpathref="pmd.path"/>
+  <taskdef name="cpd" classname="net.sourceforge.pmd.ant.CPDTask"
+           classpathref="pmd.path"/>
+
+  <taskdef resource="edu/umd/cs/findbugs/anttask/tasks.properties"
+           classpath="${spotbugs.home}/lib/spotbugs-ant.jar"/>
+
+  <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+    <classpath path="${tool.jars}/jacocoant.jar"/>
+  </taskdef>
+
+  <!-- ========================= Quality Targets =========================== -->
+
+  <target name="quality" depends="checkstyle,pmd,cpd,spotbugs,test-coverage"
+          description="Run all quality checks: Checkstyle, PMD, CPD, SpotBugs, JUnit+JaCoCo">
+    <echo>Quality results in: ${results.dir}/</echo>
+  </target>
+
+  <target name="checkstyle" depends="compile" description="Check coding conventions with Checkstyle">
+    <mkdir dir="${results.dir}"/>
+    <echo>Running Checkstyle</echo>
+    <checkstyle config="${checkstyle.dir}/checkstyle-master.xml"
+                failureProperty="checkstyle.failure"
+                failOnViolation="false">
+      <fileset dir="${src.dir}" includes="**/*.java"/>
+      <property key="checkstyle.dir" value="${checkstyle.dir}"/>
+      <property key="checkstyle.suppressions.file"
+                value="${checkstyle.dir}/${checkstyle.suppressions.file}"/>
+      <property key="checkstyle.importcontrol.file"
+                value="${checkstyle.dir}/${checkstyle.importcontrol.file}"/>
+      <property key="translation.severity" value="${translation.severity}"/>
+      <formatter type="plain" tofile="${results.dir}/checkstyle_report.txt"/>
+      <formatter type="xml"   tofile="${results.dir}/checkstyle_report.xml"/>
+    </checkstyle>
+    <xslt in="${results.dir}/checkstyle_report.xml"
+          out="${results.dir}/checkstyle_report.html"
+          style="${checkstyle.dir}/contrib/checkstyle-noframes.xsl"/>
+    <echo>Checkstyle report: ${results.dir}/checkstyle_report.html</echo>
+  </target>
+
+  <target name="pmd" depends="compile" description="Detect code weaknesses with PMD">
+    <mkdir dir="${results.dir}"/>
+    <echo>Running PMD</echo>
+    <pmd noCache="true">
+      <ruleset>tools/pmd/ruleset.xml</ruleset>
+      <formatter type="xml" toFile="${results.dir}/pmd_report.xml"/>
+      <fileset dir="${src.dir}">
+        <include name="**/*.java"/>
+      </fileset>
+    </pmd>
+    <xslt in="${results.dir}/pmd_report.xml"
+          out="${results.dir}/pmd_report.html"
+          style="${pmd.home}/pmd-report.xsl"/>
+    <echo>PMD report: ${results.dir}/pmd_report.html</echo>
+  </target>
+
+  <target name="cpd" depends="compile" description="Detect copy-paste duplication with CPD">
+    <mkdir dir="${results.dir}"/>
+    <echo>Running CPD</echo>
+    <cpd minimumTokenCount="100"
+         outputFile="${results.dir}/cpd.txt"
+         format="text">
+      <fileset dir="${src.dir}">
+        <include name="**/*.java"/>
+      </fileset>
+    </cpd>
+    <echo>CPD report: ${results.dir}/cpd.txt</echo>
+  </target>
+
+  <target name="spotbugs" depends="compile" description="Find bugs with SpotBugs">
+    <mkdir dir="${results.dir}"/>
+    <echo>Running SpotBugs</echo>
+    <spotbugs home="${spotbugs.home}"
+              output="html"
+              outputFile="${results.dir}/spotbugs.html"
+              reportLevel="medium"
+              effort="default">
+      <auxClasspath>
+        <pathelement path="${junit.jar}"/>
+        <pathelement path="${flatlaf.jar}"/>
+        <pathelement path="${flatlaf.themes.jar}"/>
+      </auxClasspath>
+      <sourcePath path="${src.dir}"/>
+      <class location="${build.dir}"/>
+    </spotbugs>
+    <echo>SpotBugs report: ${results.dir}/spotbugs.html</echo>
+  </target>
+
+  <target name="test-coverage" depends="test-compile"
+          description="Run JUnit tests with JaCoCo coverage measurement">
+    <mkdir dir="${results.dir}/junit"/>
+    <mkdir dir="${jacoco.results.dir}"/>
+    <echo>Running JUnit with JaCoCo coverage</echo>
+    <jacoco:coverage destfile="${jacoco.exec.file}">
+      <java classname="org.junit.platform.console.ConsoleLauncher"
+            fork="true" failonerror="false">
+        <classpath>
+          <pathelement location="${build.dir}"/>
+          <pathelement location="${test.build}"/>
+          <pathelement location="${junit.jar}"/>
+          <pathelement path="${flatlaf.jar}"/>
+          <pathelement path="${flatlaf.themes.jar}"/>
+        </classpath>
+        <arg value="execute"/>
+        <arg value="--scan-classpath=${test.build}"/>
+        <arg value="--reports-dir=${results.dir}/junit"/>
+        <arg value="--exclude-engine=junit-vintage"/>
+      </java>
+    </jacoco:coverage>
+    <jacoco:report>
+      <executiondata>
+        <file file="${jacoco.exec.file}"/>
+      </executiondata>
+      <structure name="${app.name} Test Coverage">
+        <classfiles>
+          <fileset dir="${build.dir}">
+            <exclude name="**/*Test.class"/>
+          </fileset>
+        </classfiles>
+        <sourcefiles encoding="UTF-8">
+          <fileset dir="${src.dir}"/>
+        </sourcefiles>
+      </structure>
+      <html destdir="${jacoco.results.dir}"/>
+      <csv  destfile="${jacoco.results.dir}/jacoco_results.csv"/>
+      <xml  destfile="${jacoco.results.dir}/jacoco_results.xml"/>
+    </jacoco:report>
+    <echo>JaCoCo coverage report: ${jacoco.results.dir}/index.html</echo>
   </target>
 
 </project>

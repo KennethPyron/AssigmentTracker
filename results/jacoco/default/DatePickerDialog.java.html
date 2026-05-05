@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DatePickerDialog.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AssignmentTracker Test Coverage</a> &gt; <a href="index.source.html" class="el_package">default</a> &gt; <span class="el_source">DatePickerDialog.java</span></div><h1>DatePickerDialog.java</h1><pre class="source lang-java linenums">import javax.swing.*;
+import javax.swing.border.LineBorder;
+import java.awt.*;
+import java.awt.event.*;
+import java.time.*;
+import java.time.format.TextStyle;
+import java.util.Locale;
+
+/**
+ * A small modal calendar popup that lets the user click a date to select it.
+ * Returns the chosen date as a LocalDate, or null if the dialog was cancelled.
+ *
+ * Colors come from the current Look &amp; Feel via UIManager so the popup matches
+ * FlatLaf's theme.
+ */
+public class DatePickerDialog extends JDialog {
+
+    private LocalDate selected;
+    private YearMonth displayedMonth;
+
+    private JLabel monthYearLabel;
+    private JPanel gridPanel;
+
+    /**
+     * Shows the dialog and returns the picked date, or null if cancelled.
+     *
+     * @param owner   the parent component (used for positioning)
+     * @param initial the date to highlight on open, or null for today
+     */
+    public static LocalDate show(Component owner, LocalDate initial) {
+<span class="nc" id="L31">        Window parentWindow = SwingUtilities.getWindowAncestor(owner);</span>
+<span class="nc bnc" id="L32" title="All 2 branches missed.">        DatePickerDialog dlg = (parentWindow instanceof Frame)</span>
+<span class="nc" id="L33">                ? new DatePickerDialog((Frame) parentWindow, initial)</span>
+<span class="nc" id="L34">                : new DatePickerDialog((Dialog) parentWindow, initial);</span>
+<span class="nc" id="L35">        dlg.setVisible(true);</span>
+<span class="nc" id="L36">        return dlg.selected;</span>
+    }
+
+    private DatePickerDialog(Frame owner, LocalDate initial) {
+<span class="nc" id="L40">        super(owner, &quot;Pick a Date&quot;, true);</span>
+<span class="nc" id="L41">        init(initial);</span>
+<span class="nc" id="L42">    }</span>
+
+    private DatePickerDialog(Dialog owner, LocalDate initial) {
+<span class="nc" id="L45">        super(owner, &quot;Pick a Date&quot;, true);</span>
+<span class="nc" id="L46">        init(initial);</span>
+<span class="nc" id="L47">    }</span>
+
+    private void init(LocalDate initial) {
+<span class="nc" id="L50">        selected = null;</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">        displayedMonth = YearMonth.from(initial != null ? initial : LocalDate.now());</span>
+
+<span class="nc" id="L53">        setLayout(new BorderLayout());</span>
+<span class="nc" id="L54">        add(buildHeader(), BorderLayout.NORTH);</span>
+
+<span class="nc" id="L56">        gridPanel = new JPanel();</span>
+<span class="nc" id="L57">        add(gridPanel, BorderLayout.CENTER);</span>
+<span class="nc" id="L58">        rebuildGrid(initial);</span>
+
+<span class="nc" id="L60">        setResizable(false);</span>
+<span class="nc" id="L61">        pack();</span>
+<span class="nc" id="L62">        setLocationRelativeTo(getOwner());</span>
+<span class="nc" id="L63">    }</span>
+
+    // -----------------------------------------------------------------------
+    // Header (month/year + prev/next)
+    // -----------------------------------------------------------------------
+
+    private JPanel buildHeader() {
+<span class="nc" id="L70">        JPanel header = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L71">        header.setOpaque(false);</span>
+<span class="nc" id="L72">        header.setBorder(BorderFactory.createEmptyBorder(6, 10, 6, 10));</span>
+
+<span class="nc" id="L74">        JButton prev = makeNavBtn(&quot;\u25C0&quot;);</span>
+<span class="nc" id="L75">        JButton next = makeNavBtn(&quot;\u25B6&quot;);</span>
+
+<span class="nc" id="L77">        monthYearLabel = new JLabel(&quot;&quot;, SwingConstants.CENTER);</span>
+<span class="nc" id="L78">        monthYearLabel.setFont(monthYearLabel.getFont().deriveFont(Font.BOLD, 14f));</span>
+<span class="nc" id="L79">        monthYearLabel.setForeground(ACCENT);</span>
+
+<span class="nc" id="L81">        prev.addActionListener(e -&gt; {</span>
+<span class="nc" id="L82">            displayedMonth = displayedMonth.minusMonths(1);</span>
+<span class="nc" id="L83">            rebuildGrid(null);</span>
+<span class="nc" id="L84">        });</span>
+<span class="nc" id="L85">        next.addActionListener(e -&gt; {</span>
+<span class="nc" id="L86">            displayedMonth = displayedMonth.plusMonths(1);</span>
+<span class="nc" id="L87">            rebuildGrid(null);</span>
+<span class="nc" id="L88">        });</span>
+
+<span class="nc" id="L90">        header.add(prev,            BorderLayout.WEST);</span>
+<span class="nc" id="L91">        header.add(monthYearLabel,  BorderLayout.CENTER);</span>
+<span class="nc" id="L92">        header.add(next,            BorderLayout.EAST);</span>
+<span class="nc" id="L93">        return header;</span>
+    }
+
+<span class="nc" id="L96">    private static final Color ACCENT = new Color(99, 102, 241);</span>
+
+    private JButton makeNavBtn(String symbol) {
+<span class="nc" id="L99">        JButton btn = new JButton(symbol);</span>
+<span class="nc" id="L100">        btn.putClientProperty(&quot;JButton.buttonType&quot;, &quot;roundRect&quot;);</span>
+<span class="nc" id="L101">        btn.setFont(btn.getFont().deriveFont(Font.BOLD, 13f));</span>
+<span class="nc" id="L102">        btn.setForeground(ACCENT);</span>
+<span class="nc" id="L103">        return btn;</span>
+    }
+
+    // -----------------------------------------------------------------------
+    // Grid
+    // -----------------------------------------------------------------------
+
+    private void rebuildGrid(LocalDate highlighted) {
+<span class="nc" id="L111">        String monthName = displayedMonth.getMonth()</span>
+<span class="nc" id="L112">                .getDisplayName(TextStyle.FULL, Locale.getDefault());</span>
+<span class="nc" id="L113">        monthYearLabel.setText(monthName + &quot; &quot; + displayedMonth.getYear());</span>
+
+<span class="nc" id="L115">        Color gridLine   = UIManager.getColor(&quot;Component.borderColor&quot;);</span>
+<span class="nc" id="L116">        Color dayNameBg  = UIManager.getColor(&quot;TableHeader.background&quot;);</span>
+<span class="nc" id="L117">        Color dayNameFg  = UIManager.getColor(&quot;TableHeader.foreground&quot;);</span>
+
+<span class="nc" id="L119">        remove(gridPanel);</span>
+<span class="nc" id="L120">        gridPanel = new JPanel(new GridLayout(0, 7, 1, 1));</span>
+<span class="nc" id="L121">        gridPanel.setBackground(gridLine);</span>
+<span class="nc" id="L122">        gridPanel.setBorder(new LineBorder(gridLine));</span>
+
+        // Day-name row
+<span class="nc" id="L125">        String[] dayNames = {&quot;Su&quot;, &quot;Mo&quot;, &quot;Tu&quot;, &quot;We&quot;, &quot;Th&quot;, &quot;Fr&quot;, &quot;Sa&quot;};</span>
+<span class="nc bnc" id="L126" title="All 2 branches missed.">        for (String n : dayNames) {</span>
+<span class="nc" id="L127">            JLabel lbl = new JLabel(n, SwingConstants.CENTER);</span>
+<span class="nc" id="L128">            lbl.setOpaque(true);</span>
+<span class="nc" id="L129">            lbl.setBackground(dayNameBg);</span>
+<span class="nc" id="L130">            lbl.setForeground(dayNameFg);</span>
+<span class="nc" id="L131">            lbl.setFont(lbl.getFont().deriveFont(Font.BOLD, 11f));</span>
+<span class="nc" id="L132">            lbl.setBorder(BorderFactory.createEmptyBorder(4, 0, 4, 0));</span>
+<span class="nc" id="L133">            gridPanel.add(lbl);</span>
+        }
+
+<span class="nc" id="L136">        LocalDate today        = LocalDate.now();</span>
+<span class="nc" id="L137">        LocalDate firstOfMonth = displayedMonth.atDay(1);</span>
+<span class="nc" id="L138">        int startOffset        = firstOfMonth.getDayOfWeek().getValue() % 7;</span>
+<span class="nc" id="L139">        LocalDate cellDate     = firstOfMonth.minusDays(startOffset);</span>
+
+<span class="nc bnc" id="L141" title="All 2 branches missed.">        for (int i = 0; i &lt; 42; i++) {</span>
+<span class="nc" id="L142">            gridPanel.add(buildCell(cellDate, today, highlighted));</span>
+<span class="nc" id="L143">            cellDate = cellDate.plusDays(1);</span>
+        }
+
+<span class="nc" id="L146">        add(gridPanel, BorderLayout.CENTER);</span>
+<span class="nc" id="L147">        revalidate();</span>
+<span class="nc" id="L148">        pack();</span>
+<span class="nc" id="L149">    }</span>
+
+    private JPanel buildCell(LocalDate date, LocalDate today, LocalDate highlighted) {
+<span class="nc" id="L152">        Color thisMonthBg  = UIManager.getColor(&quot;Table.background&quot;);</span>
+<span class="nc" id="L153">        Color otherMonthBg = UIManager.getColor(&quot;Panel.background&quot;);</span>
+<span class="nc" id="L154">        Color todayBg      = UIManager.getColor(&quot;Table.selectionBackground&quot;);</span>
+<span class="nc" id="L155">        Color todayFg      = UIManager.getColor(&quot;Table.selectionForeground&quot;);</span>
+<span class="nc" id="L156">        Color normalFg     = UIManager.getColor(&quot;Label.foreground&quot;);</span>
+<span class="nc" id="L157">        Color mutedFg      = UIManager.getColor(&quot;Label.disabledForeground&quot;);</span>
+<span class="nc" id="L158">        Color hoverBorder  = UIManager.getColor(&quot;Component.focusColor&quot;);</span>
+
+<span class="nc" id="L160">        boolean isThisMonth   = YearMonth.from(date).equals(displayedMonth);</span>
+<span class="nc" id="L161">        boolean isToday       = date.equals(today);</span>
+<span class="nc" id="L162">        boolean isHighlighted = date.equals(highlighted);</span>
+
+<span class="nc" id="L164">        JPanel cell = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L165">        cell.setPreferredSize(new Dimension(36, 30));</span>
+<span class="nc" id="L166">        cell.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));</span>
+
+        Color bg;
+<span class="nc bnc" id="L169" title="All 4 branches missed.">        if (isHighlighted || isToday) {</span>
+<span class="nc" id="L170">            bg = todayBg;</span>
+<span class="nc bnc" id="L171" title="All 2 branches missed.">        } else if (isThisMonth) {</span>
+<span class="nc" id="L172">            bg = thisMonthBg;</span>
+        } else {
+<span class="nc" id="L174">            bg = otherMonthBg;</span>
+        }
+<span class="nc" id="L176">        cell.setBackground(bg);</span>
+<span class="nc" id="L177">        cell.setBorder(BorderFactory.createEmptyBorder(3, 4, 3, 4));</span>
+
+<span class="nc" id="L179">        JLabel lbl = new JLabel(String.valueOf(date.getDayOfMonth()), SwingConstants.CENTER);</span>
+<span class="nc bnc" id="L180" title="All 2 branches missed.">        lbl.setFont(lbl.getFont().deriveFont(isToday ? Font.BOLD : Font.PLAIN, 12f));</span>
+<span class="nc bnc" id="L181" title="All 4 branches missed.">        Color fg = (isHighlighted || isToday) ? todayFg</span>
+<span class="nc bnc" id="L182" title="All 2 branches missed.">                 : isThisMonth                ? normalFg</span>
+<span class="nc" id="L183">                 :                              mutedFg;</span>
+<span class="nc" id="L184">        lbl.setForeground(fg);</span>
+<span class="nc" id="L185">        cell.add(lbl, BorderLayout.CENTER);</span>
+
+<span class="nc" id="L187">        final LocalDate picked = date;</span>
+<span class="nc" id="L188">        cell.addMouseListener(new MouseAdapter() {</span>
+            @Override
+            public void mouseClicked(MouseEvent e) {
+<span class="nc" id="L191">                selected = picked;</span>
+<span class="nc" id="L192">                dispose();</span>
+<span class="nc" id="L193">            }</span>
+            @Override
+            public void mouseEntered(MouseEvent e) {
+<span class="nc" id="L196">                cell.setBorder(new LineBorder(hoverBorder, 2));</span>
+<span class="nc" id="L197">            }</span>
+            @Override
+            public void mouseExited(MouseEvent e) {
+<span class="nc" id="L200">                cell.setBorder(BorderFactory.createEmptyBorder(3, 4, 3, 4));</span>
+<span class="nc" id="L201">            }</span>
+        });
+
+<span class="nc" id="L204">        return cell;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

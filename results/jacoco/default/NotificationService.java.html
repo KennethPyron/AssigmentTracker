@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NotificationService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AssignmentTracker Test Coverage</a> &gt; <a href="index.source.html" class="el_package">default</a> &gt; <span class="el_source">NotificationService.java</span></div><h1>NotificationService.java</h1><pre class="source lang-java linenums">import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.prefs.Preferences;
+
+public class NotificationService {
+
+    private static final String PREF_ENABLED      = &quot;notif_enabled&quot;;
+    private static final String PREF_DAYS_AHEAD   = &quot;notif_days_ahead&quot;;
+    private static final String PREF_SHOW_OVERDUE = &quot;notif_show_overdue&quot;;
+    private static final String PREF_HOUR         = &quot;notif_hour&quot;;
+
+<span class="nc" id="L18">    private static final Preferences PREFS = Preferences.userNodeForPackage(NotificationService.class);</span>
+
+    private final DefaultListModel&lt;Subject&gt; subjectModel;
+    private final JFrame parentFrame;
+    private Timer dailyTimer;
+
+<span class="nc" id="L24">    public NotificationService(DefaultListModel&lt;Subject&gt; subjectModel, JFrame parentFrame) {</span>
+<span class="nc" id="L25">        this.subjectModel = subjectModel;</span>
+<span class="nc" id="L26">        this.parentFrame  = parentFrame;</span>
+<span class="nc" id="L27">    }</span>
+
+    public void start() {
+<span class="nc" id="L30">        checkAndNotify();</span>
+<span class="nc" id="L31">        scheduleDailyTimer();</span>
+<span class="nc" id="L32">    }</span>
+
+    private void scheduleDailyTimer() {
+<span class="nc bnc" id="L35" title="All 2 branches missed.">        if (dailyTimer != null) dailyTimer.stop();</span>
+<span class="nc" id="L36">        int targetHour = PREFS.getInt(PREF_HOUR, 8);</span>
+<span class="nc" id="L37">        long now = System.currentTimeMillis();</span>
+<span class="nc" id="L38">        java.util.Calendar cal = java.util.Calendar.getInstance();</span>
+<span class="nc" id="L39">        cal.set(java.util.Calendar.HOUR_OF_DAY, targetHour);</span>
+<span class="nc" id="L40">        cal.set(java.util.Calendar.MINUTE, 0);</span>
+<span class="nc" id="L41">        cal.set(java.util.Calendar.SECOND, 0);</span>
+<span class="nc" id="L42">        cal.set(java.util.Calendar.MILLISECOND, 0);</span>
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        if (cal.getTimeInMillis() &lt;= now) {</span>
+<span class="nc" id="L44">            cal.add(java.util.Calendar.DAY_OF_YEAR, 1);</span>
+        }
+<span class="nc" id="L46">        int delay = (int) Math.min(cal.getTimeInMillis() - now, Integer.MAX_VALUE);</span>
+<span class="nc" id="L47">        dailyTimer = new Timer(delay, e -&gt; {</span>
+<span class="nc" id="L48">            checkAndNotify();</span>
+<span class="nc" id="L49">            dailyTimer.setDelay(24 * 60 * 60 * 1000);</span>
+<span class="nc" id="L50">            dailyTimer.restart();</span>
+<span class="nc" id="L51">        });</span>
+<span class="nc" id="L52">        dailyTimer.setRepeats(false);</span>
+<span class="nc" id="L53">        dailyTimer.start();</span>
+<span class="nc" id="L54">    }</span>
+
+    public void checkAndNotify() {
+<span class="nc bnc" id="L57" title="All 2 branches missed.">        if (!PREFS.getBoolean(PREF_ENABLED, true)) return;</span>
+
+<span class="nc" id="L59">        int daysAhead    = PREFS.getInt(PREF_DAYS_AHEAD, 3);</span>
+<span class="nc" id="L60">        boolean overdue  = PREFS.getBoolean(PREF_SHOW_OVERDUE, true);</span>
+<span class="nc" id="L61">        LocalDate today  = LocalDate.now();</span>
+
+<span class="nc" id="L63">        List&lt;String&gt; upcoming = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L64">        List&lt;String&gt; overdueList = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L66" title="All 2 branches missed.">        for (int i = 0; i &lt; subjectModel.size(); i++) {</span>
+<span class="nc" id="L67">            Subject subject = subjectModel.get(i);</span>
+<span class="nc" id="L68">            DefaultTableModel tm = subject.getTableModel();</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">            for (int r = 0; r &lt; tm.getRowCount(); r++) {</span>
+<span class="nc" id="L70">                Boolean done = (Boolean) tm.getValueAt(r, 2);</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">                if (Boolean.TRUE.equals(done)) continue;</span>
+<span class="nc" id="L72">                String raw = (String) tm.getValueAt(r, 1);</span>
+<span class="nc bnc" id="L73" title="All 4 branches missed.">                if (raw == null || raw.trim().isEmpty()) continue;</span>
+<span class="nc" id="L74">                LocalDate due = parseDate(raw.trim());</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">                if (due == null) continue;</span>
+<span class="nc" id="L76">                String label = subject.getName() + &quot;: &quot; + tm.getValueAt(r, 0)</span>
+<span class="nc" id="L77">                        + &quot;  (due &quot; + raw.trim() + &quot;)&quot;;</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">                if (due.isBefore(today)) {</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">                    if (overdue) overdueList.add(label);</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">                } else if (!due.isAfter(today.plusDays(daysAhead))) {</span>
+<span class="nc" id="L81">                    upcoming.add(label);</span>
+                }
+            }
+        }
+
+<span class="nc bnc" id="L86" title="All 4 branches missed.">        if (upcoming.isEmpty() &amp;&amp; overdueList.isEmpty()) return;</span>
+
+<span class="nc" id="L88">        SwingUtilities.invokeLater(() -&gt; showNotificationDialog(upcoming, overdueList));</span>
+<span class="nc" id="L89">    }</span>
+
+    private void showNotificationDialog(List&lt;String&gt; upcoming, List&lt;String&gt; overdueList) {
+<span class="nc" id="L92">        JPanel panel = new JPanel(new BorderLayout(8, 8));</span>
+<span class="nc" id="L93">        panel.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));</span>
+
+<span class="nc" id="L95">        JPanel content = new JPanel();</span>
+<span class="nc" id="L96">        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));</span>
+
+<span class="nc bnc" id="L98" title="All 2 branches missed.">        if (!overdueList.isEmpty()) {</span>
+<span class="nc" id="L99">            JLabel overdueHeader = new JLabel(&quot;Overdue:&quot;);</span>
+<span class="nc" id="L100">            overdueHeader.setFont(overdueHeader.getFont().deriveFont(Font.BOLD, 13f));</span>
+<span class="nc" id="L101">            overdueHeader.setForeground(new Color(220, 70, 70));</span>
+<span class="nc" id="L102">            content.add(overdueHeader);</span>
+<span class="nc" id="L103">            content.add(Box.createVerticalStrut(4));</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">            for (String s : overdueList) {</span>
+<span class="nc" id="L105">                JLabel lbl = new JLabel(&quot;  \u2022 &quot; + s);</span>
+<span class="nc" id="L106">                lbl.setForeground(new Color(220, 70, 70));</span>
+<span class="nc" id="L107">                content.add(lbl);</span>
+<span class="nc" id="L108">            }</span>
+<span class="nc" id="L109">            content.add(Box.createVerticalStrut(10));</span>
+        }
+
+<span class="nc bnc" id="L112" title="All 2 branches missed.">        if (!upcoming.isEmpty()) {</span>
+<span class="nc" id="L113">            JLabel upcomingHeader = new JLabel(&quot;Upcoming:&quot;);</span>
+<span class="nc" id="L114">            upcomingHeader.setFont(upcomingHeader.getFont().deriveFont(Font.BOLD, 13f));</span>
+<span class="nc" id="L115">            content.add(upcomingHeader);</span>
+<span class="nc" id="L116">            content.add(Box.createVerticalStrut(4));</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">            for (String s : upcoming) {</span>
+<span class="nc" id="L118">                content.add(new JLabel(&quot;  \u2022 &quot; + s));</span>
+<span class="nc" id="L119">            }</span>
+        }
+
+<span class="nc" id="L122">        panel.add(new JScrollPane(content), BorderLayout.CENTER);</span>
+
+<span class="nc" id="L124">        JOptionPane.showMessageDialog(parentFrame, panel,</span>
+                &quot;Assignment Reminder&quot;, JOptionPane.WARNING_MESSAGE);
+<span class="nc" id="L126">    }</span>
+
+    public void showSettingsDialog() {
+<span class="nc" id="L129">        JDialog dialog = new JDialog(parentFrame, &quot;Notification Settings&quot;, true);</span>
+<span class="nc" id="L130">        dialog.setLayout(new BorderLayout(10, 10));</span>
+<span class="nc" id="L131">        dialog.getRootPane().setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));</span>
+
+<span class="nc" id="L133">        JPanel form = new JPanel(new GridBagLayout());</span>
+<span class="nc" id="L134">        GridBagConstraints gbc = new GridBagConstraints();</span>
+<span class="nc" id="L135">        gbc.insets  = new Insets(6, 6, 6, 6);</span>
+<span class="nc" id="L136">        gbc.fill    = GridBagConstraints.HORIZONTAL;</span>
+<span class="nc" id="L137">        gbc.anchor  = GridBagConstraints.WEST;</span>
+
+<span class="nc" id="L139">        JCheckBox enabledBox = new JCheckBox(&quot;Enable notifications&quot;,</span>
+<span class="nc" id="L140">                PREFS.getBoolean(PREF_ENABLED, true));</span>
+
+<span class="nc" id="L142">        JCheckBox overdueBox = new JCheckBox(&quot;Include overdue assignments&quot;,</span>
+<span class="nc" id="L143">                PREFS.getBoolean(PREF_SHOW_OVERDUE, true));</span>
+
+<span class="nc" id="L145">        SpinnerNumberModel daysModel = new SpinnerNumberModel(</span>
+<span class="nc" id="L146">                PREFS.getInt(PREF_DAYS_AHEAD, 3), 0, 30, 1);</span>
+<span class="nc" id="L147">        JSpinner daysSpinner = new JSpinner(daysModel);</span>
+<span class="nc" id="L148">        ((JSpinner.DefaultEditor) daysSpinner.getEditor()).getTextField().setColumns(3);</span>
+
+<span class="nc" id="L150">        SpinnerNumberModel hourModel = new SpinnerNumberModel(</span>
+<span class="nc" id="L151">                PREFS.getInt(PREF_HOUR, 8), 0, 23, 1);</span>
+<span class="nc" id="L152">        JSpinner hourSpinner = new JSpinner(hourModel);</span>
+<span class="nc" id="L153">        ((JSpinner.DefaultEditor) hourSpinner.getEditor()).getTextField().setColumns(3);</span>
+
+<span class="nc" id="L155">        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;</span>
+<span class="nc" id="L156">        form.add(enabledBox, gbc);</span>
+
+<span class="nc" id="L158">        gbc.gridy = 1;</span>
+<span class="nc" id="L159">        form.add(overdueBox, gbc);</span>
+
+<span class="nc" id="L161">        gbc.gridwidth = 1;</span>
+<span class="nc" id="L162">        gbc.gridy = 2; gbc.gridx = 0;</span>
+<span class="nc" id="L163">        form.add(new JLabel(&quot;Notify days before due:&quot;), gbc);</span>
+<span class="nc" id="L164">        gbc.gridx = 1;</span>
+<span class="nc" id="L165">        form.add(daysSpinner, gbc);</span>
+
+<span class="nc" id="L167">        gbc.gridy = 3; gbc.gridx = 0;</span>
+<span class="nc" id="L168">        form.add(new JLabel(&quot;Daily reminder hour (0-23):&quot;), gbc);</span>
+<span class="nc" id="L169">        gbc.gridx = 1;</span>
+<span class="nc" id="L170">        form.add(hourSpinner, gbc);</span>
+
+<span class="nc" id="L172">        dialog.add(form, BorderLayout.CENTER);</span>
+
+<span class="nc" id="L174">        JButton saveBtn   = new JButton(&quot;Save&quot;);</span>
+<span class="nc" id="L175">        JButton cancelBtn = new JButton(&quot;Cancel&quot;);</span>
+
+<span class="nc" id="L177">        saveBtn.addActionListener(e -&gt; {</span>
+<span class="nc" id="L178">            PREFS.putBoolean(PREF_ENABLED,      enabledBox.isSelected());</span>
+<span class="nc" id="L179">            PREFS.putBoolean(PREF_SHOW_OVERDUE, overdueBox.isSelected());</span>
+<span class="nc" id="L180">            PREFS.putInt(PREF_DAYS_AHEAD,       (int) daysSpinner.getValue());</span>
+<span class="nc" id="L181">            PREFS.putInt(PREF_HOUR,             (int) hourSpinner.getValue());</span>
+<span class="nc" id="L182">            scheduleDailyTimer();</span>
+<span class="nc" id="L183">            dialog.dispose();</span>
+<span class="nc" id="L184">        });</span>
+<span class="nc" id="L185">        cancelBtn.addActionListener(e -&gt; dialog.dispose());</span>
+
+<span class="nc" id="L187">        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));</span>
+<span class="nc" id="L188">        buttons.add(cancelBtn);</span>
+<span class="nc" id="L189">        buttons.add(saveBtn);</span>
+<span class="nc" id="L190">        dialog.add(buttons, BorderLayout.SOUTH);</span>
+
+<span class="nc" id="L192">        dialog.pack();</span>
+<span class="nc" id="L193">        dialog.setResizable(false);</span>
+<span class="nc" id="L194">        dialog.setLocationRelativeTo(parentFrame);</span>
+<span class="nc" id="L195">        dialog.setVisible(true);</span>
+<span class="nc" id="L196">    }</span>
+
+    private static LocalDate parseDate(String raw) {
+        try {
+<span class="nc" id="L200">            return LocalDate.parse(raw, DateTimeFormatter.ofPattern(&quot;MM/dd/yyyy&quot;));</span>
+<span class="nc" id="L201">        } catch (DateTimeParseException ignored) { }</span>
+        try {
+<span class="nc" id="L203">            return LocalDate.parse(raw);</span>
+<span class="nc" id="L204">        } catch (DateTimeParseException ignored) { }</span>
+<span class="nc" id="L205">        return null;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

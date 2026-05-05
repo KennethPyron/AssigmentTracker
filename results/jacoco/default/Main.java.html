@@ -1,0 +1,538 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Main.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AssignmentTracker Test Coverage</a> &gt; <a href="index.source.html" class="el_package">default</a> &gt; <span class="el_source">Main.java</span></div><h1>Main.java</h1><pre class="source lang-java linenums">import com.formdev.flatlaf.FlatDarkLaf;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
+import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
+/**
+ * Main class with main method invoked on app start.
+ * @version 1.0.4
+ * @author Dr. Jody Paul
+ * @author Ayslynn Wardall, Kenneth Pyron, Amadou Seck, Diego Salas
+ */
+public class Main {
+    /** Private constructor to prevent instantiation of entry point class. */
+    private Main() { }
+
+    /**
+     * Invoked on start.
+     * @param args ignored
+     */
+    public static void main(String[] args) {
+        // Let FlatLaf draw the title bar and window border so they theme with
+        // the rest of the app. Must be set before any JFrame/JDialog is created.
+<span class="nc" id="L30">        JFrame.setDefaultLookAndFeelDecorated(true);</span>
+<span class="nc" id="L31">        JDialog.setDefaultLookAndFeelDecorated(true);</span>
+
+        try {
+<span class="nc" id="L34">            ThemeManager.get().current().apply();</span>
+<span class="nc" id="L35">        } catch (ThemeApplyException e) {</span>
+            // Missing themes JAR or other classpath problem — fall back so
+            // the app still launches.
+<span class="nc" id="L38">            System.err.println(&quot;Could not apply saved theme: &quot; + e.getMessage());</span>
+<span class="nc" id="L39">            FlatDarkLaf.setup();</span>
+<span class="nc" id="L40">        }</span>
+<span class="nc" id="L41">        UIManager.put(&quot;Button.arc&quot;, 8);</span>
+<span class="nc" id="L42">        UIManager.put(&quot;TextComponent.arc&quot;, 6);</span>
+<span class="nc" id="L43">        UIManager.put(&quot;Component.arc&quot;, 6);</span>
+<span class="nc" id="L44">        Font tnr = new Font(&quot;Times New Roman&quot;, Font.PLAIN, 15);</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        for (String key : new String[]{</span>
+                &quot;Button.font&quot;, &quot;Label.font&quot;, &quot;List.font&quot;, &quot;Table.font&quot;,
+                &quot;TableHeader.font&quot;, &quot;TextField.font&quot;, &quot;TextArea.font&quot;,
+                &quot;ComboBox.font&quot;, &quot;TabbedPane.font&quot;, &quot;ToggleButton.font&quot;,
+                &quot;TitledBorder.font&quot;, &quot;ToolTip.font&quot;}) {
+<span class="nc" id="L50">            UIManager.put(key, tnr);</span>
+        }
+<span class="nc" id="L52">        SwingUtilities.invokeLater(Main::createAndShowGUI);</span>
+<span class="nc" id="L53">    }</span>
+
+    /** Draws a small calendar icon at the given size using Java2D. */
+    private static ImageIcon makeCalendarIcon(int size) {
+<span class="nc" id="L57">        java.awt.image.BufferedImage img = new java.awt.image.BufferedImage(</span>
+                size, size, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+<span class="nc" id="L59">        Graphics2D g = img.createGraphics();</span>
+<span class="nc" id="L60">        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);</span>
+
+<span class="nc" id="L62">        int arc = size / 5;</span>
+<span class="nc" id="L63">        g.setColor(Color.WHITE);</span>
+<span class="nc" id="L64">        g.fillRoundRect(0, 2, size, size - 2, arc, arc);</span>
+<span class="nc" id="L65">        g.setColor(new Color(99, 102, 241));</span>
+<span class="nc" id="L66">        g.fillRoundRect(0, 2, size, size / 3, arc, arc);</span>
+<span class="nc" id="L67">        g.fillRect(0, size / 3 - arc / 2, size, arc / 2 + 1);</span>
+<span class="nc" id="L68">        g.setColor(new Color(100, 100, 100));</span>
+<span class="nc" id="L69">        g.setStroke(new BasicStroke(1f));</span>
+<span class="nc" id="L70">        g.drawRoundRect(0, 2, size - 1, size - 3, arc, arc);</span>
+<span class="nc" id="L71">        g.setColor(new Color(60, 60, 60));</span>
+<span class="nc" id="L72">        int pegY = 0;</span>
+<span class="nc" id="L73">        int pegW = Math.max(2, size / 8);</span>
+<span class="nc" id="L74">        int pegH = size / 4;</span>
+<span class="nc" id="L75">        g.fillRoundRect(size / 4 - pegW / 2, pegY, pegW, pegH, 2, 2);</span>
+<span class="nc" id="L76">        g.fillRoundRect(3 * size / 4 - pegW / 2, pegY, pegW, pegH, 2, 2);</span>
+<span class="nc" id="L77">        g.setColor(new Color(99, 102, 241));</span>
+<span class="nc" id="L78">        int dotSize = Math.max(1, size / 10);</span>
+<span class="nc" id="L79">        int gridTop = size / 3 + size / 8;</span>
+<span class="nc" id="L80">        int rowH = (size - gridTop - 2) / 2;</span>
+<span class="nc" id="L81">        int colW = size / 3;</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        for (int row = 0; row &lt; 2; row++) {</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">            for (int col = 0; col &lt; 3; col++) {</span>
+<span class="nc" id="L84">                int dx = colW * col + colW / 2 - dotSize / 2;</span>
+<span class="nc" id="L85">                int dy = gridTop + row * rowH + rowH / 2 - dotSize / 2;</span>
+<span class="nc" id="L86">                g.fillRect(dx, dy, dotSize + 1, dotSize + 1);</span>
+            }
+        }
+<span class="nc" id="L89">        g.dispose();</span>
+<span class="nc" id="L90">        return new ImageIcon(img);</span>
+    }
+
+    private static void createAndShowGUI() {
+<span class="nc" id="L94">        ThemeManager theme = ThemeManager.get();</span>
+
+<span class="nc" id="L96">        JFrame frame = new JFrame(&quot;Assignment Tracker&quot;);</span>
+<span class="nc" id="L97">        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);</span>
+<span class="nc" id="L98">        frame.setSize(1140, 680);</span>
+<span class="nc" id="L99">        frame.setLocationRelativeTo(null);</span>
+
+        // --- Data models ---
+<span class="nc" id="L102">        DefaultListModel&lt;Subject&gt; subjectListModel = new DefaultListModel&lt;&gt;();</span>
+<span class="nc" id="L103">        DataStore.load(subjectListModel);</span>
+
+<span class="nc" id="L105">        frame.addWindowListener(new WindowAdapter() {</span>
+            @Override
+            public void windowClosing(WindowEvent e) {
+<span class="nc" id="L108">                DataStore.save(subjectListModel);</span>
+<span class="nc" id="L109">                frame.dispose();</span>
+<span class="nc" id="L110">            }</span>
+        });
+
+<span class="nc" id="L113">        DefaultTableModel emptyTableModel = new DefaultTableModel(</span>
+<span class="nc" id="L114">                new String[]{&quot;Assignment&quot;, &quot;Due Date&quot;, &quot;Done&quot;, &quot;Notes&quot;}, 0) {</span>
+            @Override
+            public Class&lt;?&gt; getColumnClass(int col) {
+<span class="nc bnc" id="L117" title="All 2 branches missed.">                return col == 2 ? Boolean.class : String.class;</span>
+            }
+        };
+
+        // --- Center: assignment table ---
+<span class="nc" id="L122">        JTable table = new JTable(emptyTableModel);</span>
+<span class="nc" id="L123">        table.setRowHeight(30);</span>
+<span class="nc" id="L124">        table.setShowVerticalLines(false);</span>
+<span class="nc" id="L125">        table.setIntercellSpacing(new Dimension(0, 1));</span>
+<span class="nc" id="L126">        table.getTableHeader().setFont(</span>
+<span class="nc" id="L127">            table.getTableHeader().getFont().deriveFont(Font.BOLD, 12f));</span>
+<span class="nc" id="L128">        table.getTableHeader().setReorderingAllowed(false);</span>
+
+<span class="nc" id="L130">        DefaultTableCellRenderer leftRenderer = new DefaultTableCellRenderer();</span>
+<span class="nc" id="L131">        leftRenderer.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 8));</span>
+<span class="nc" id="L132">        table.getColumnModel().getColumn(0).setCellRenderer(leftRenderer);</span>
+<span class="nc" id="L133">        table.getColumnModel().getColumn(1).setCellRenderer(leftRenderer);</span>
+
+<span class="nc" id="L135">        TableRowSorter&lt;DefaultTableModel&gt; sorter = new TableRowSorter&lt;&gt;(emptyTableModel);</span>
+<span class="nc" id="L136">        table.setRowSorter(sorter);</span>
+
+<span class="nc" id="L138">        table.getColumnModel().getColumn(3).setMinWidth(0);</span>
+<span class="nc" id="L139">        table.getColumnModel().getColumn(3).setMaxWidth(0);</span>
+<span class="nc" id="L140">        table.getColumnModel().getColumn(3).setWidth(0);</span>
+
+<span class="nc" id="L142">        NotesPanel notesPanel = new NotesPanel(subjectListModel, table);</span>
+
+        // --- Filter bar ---
+<span class="nc" id="L145">        JTextField filterField = new JTextField(18);</span>
+<span class="nc" id="L146">        filterField.setToolTipText(&quot;Search assignments or notes&quot;);</span>
+<span class="nc" id="L147">        filterField.putClientProperty(&quot;JTextField.placeholderText&quot;, &quot;Search...&quot;);</span>
+<span class="nc" id="L148">        String[] filterOptions = {&quot;All&quot;, &quot;Has Notes&quot;, &quot;No Notes&quot;, &quot;Done&quot;, &quot;Not Done&quot;};</span>
+<span class="nc" id="L149">        JComboBox&lt;String&gt; filterCombo = new JComboBox&lt;&gt;(filterOptions);</span>
+<span class="nc" id="L150">        JButton clearFilterButton = new JButton(&quot;Clear&quot;);</span>
+<span class="nc" id="L151">        clearFilterButton.putClientProperty(&quot;JButton.buttonType&quot;, &quot;roundRect&quot;);</span>
+
+<span class="nc" id="L153">        JPanel filterBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 6));</span>
+<span class="nc" id="L154">        filterBar.add(filterField);</span>
+<span class="nc" id="L155">        filterBar.add(filterCombo);</span>
+<span class="nc" id="L156">        filterBar.add(clearFilterButton);</span>
+
+<span class="nc" id="L158">        Runnable applyFilter = () -&gt; {</span>
+<span class="nc" id="L159">            String text = filterField.getText().trim().toLowerCase();</span>
+<span class="nc" id="L160">            String mode = (String) filterCombo.getSelectedItem();</span>
+<span class="nc" id="L161">            RowFilter&lt;DefaultTableModel, Integer&gt; filter = new RowFilter&lt;DefaultTableModel, Integer&gt;() {</span>
+                @Override
+                public boolean include(Entry&lt;? extends DefaultTableModel, ? extends Integer&gt; entry) {
+<span class="nc" id="L164">                    String name  = entry.getStringValue(0).toLowerCase();</span>
+<span class="nc" id="L165">                    String notes = entry.getStringValue(3).toLowerCase();</span>
+<span class="nc" id="L166">                    boolean done = Boolean.TRUE.equals(entry.getValue(2));</span>
+<span class="nc bnc" id="L167" title="All 6 branches missed.">                    boolean textMatch = text.isEmpty() || name.contains(text) || notes.contains(text);</span>
+                    boolean modeMatch;
+<span class="nc bnc" id="L169" title="All 2 branches missed.">                    if (&quot;Has Notes&quot;.equals(mode)) {</span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">                        modeMatch = !notes.trim().isEmpty();</span>
+<span class="nc bnc" id="L171" title="All 2 branches missed.">                    } else if (&quot;No Notes&quot;.equals(mode)) {</span>
+<span class="nc" id="L172">                        modeMatch = notes.trim().isEmpty();</span>
+<span class="nc bnc" id="L173" title="All 2 branches missed.">                    } else if (&quot;Done&quot;.equals(mode)) {</span>
+<span class="nc" id="L174">                        modeMatch = done;</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">                    } else if (&quot;Not Done&quot;.equals(mode)) {</span>
+<span class="nc bnc" id="L176" title="All 2 branches missed.">                        modeMatch = !done;</span>
+                    } else {
+<span class="nc" id="L178">                        modeMatch = true;</span>
+                    }
+<span class="nc bnc" id="L180" title="All 4 branches missed.">                    return textMatch &amp;&amp; modeMatch;</span>
+                }
+            };
+<span class="nc" id="L183">            sorter.setRowFilter(filter);</span>
+<span class="nc" id="L184">        };</span>
+
+<span class="nc" id="L186">        filterField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {</span>
+<span class="nc" id="L187">            public void insertUpdate(javax.swing.event.DocumentEvent e)  { applyFilter.run(); }</span>
+<span class="nc" id="L188">            public void removeUpdate(javax.swing.event.DocumentEvent e)  { applyFilter.run(); }</span>
+<span class="nc" id="L189">            public void changedUpdate(javax.swing.event.DocumentEvent e) { applyFilter.run(); }</span>
+        });
+<span class="nc" id="L191">        filterCombo.addActionListener(e -&gt; applyFilter.run());</span>
+<span class="nc" id="L192">        clearFilterButton.addActionListener(e -&gt; {</span>
+<span class="nc" id="L193">            filterField.setText(&quot;&quot;);</span>
+<span class="nc" id="L194">            filterCombo.setSelectedIndex(0);</span>
+<span class="nc" id="L195">        });</span>
+
+        // --- South: input panel ---
+<span class="nc" id="L198">        DateTimeFormatter displayFmt = DateTimeFormatter.ofPattern(&quot;MM/dd/yyyy&quot;);</span>
+<span class="nc" id="L199">        JTextField nameField = new JTextField(20);</span>
+<span class="nc" id="L200">        nameField.putClientProperty(&quot;JTextField.placeholderText&quot;, &quot;Assignment name&quot;);</span>
+<span class="nc" id="L201">        JTextField dateField = new JTextField(10);</span>
+<span class="nc" id="L202">        dateField.setEditable(false);</span>
+<span class="nc" id="L203">        dateField.setToolTipText(&quot;Click the calendar button to pick a date&quot;);</span>
+<span class="nc" id="L204">        JButton datePickerButton = new JButton(makeCalendarIcon(16));</span>
+<span class="nc" id="L205">        datePickerButton.setToolTipText(&quot;Pick a date&quot;);</span>
+<span class="nc" id="L206">        datePickerButton.setFocusPainted(false);</span>
+<span class="nc" id="L207">        datePickerButton.putClientProperty(&quot;JButton.buttonType&quot;, &quot;roundRect&quot;);</span>
+
+<span class="nc" id="L209">        final LocalDate[] pickedDate = {null};</span>
+<span class="nc" id="L210">        datePickerButton.addActionListener(e -&gt; {</span>
+<span class="nc bnc" id="L211" title="All 2 branches missed.">            LocalDate initial = pickedDate[0] != null ? pickedDate[0] : LocalDate.now();</span>
+<span class="nc" id="L212">            LocalDate chosen = DatePickerDialog.show(datePickerButton, initial);</span>
+<span class="nc bnc" id="L213" title="All 2 branches missed.">            if (chosen != null) {</span>
+<span class="nc" id="L214">                pickedDate[0] = chosen;</span>
+<span class="nc" id="L215">                dateField.setText(chosen.format(displayFmt));</span>
+            }
+<span class="nc" id="L217">        });</span>
+
+<span class="nc" id="L219">        JButton addButton = new JButton(&quot;Add&quot;);</span>
+<span class="nc" id="L220">        addButton.putClientProperty(&quot;JButton.buttonType&quot;, &quot;roundRect&quot;);</span>
+<span class="nc" id="L221">        addButton.setFocusPainted(false);</span>
+
+<span class="nc" id="L223">        JButton removeButton = new JButton(&quot;Remove&quot;);</span>
+<span class="nc" id="L224">        removeButton.putClientProperty(&quot;JButton.buttonType&quot;, &quot;roundRect&quot;);</span>
+<span class="nc" id="L225">        removeButton.setFocusPainted(false);</span>
+
+<span class="nc" id="L227">        nameField.setEnabled(false);</span>
+<span class="nc" id="L228">        dateField.setEnabled(false);</span>
+<span class="nc" id="L229">        datePickerButton.setEnabled(false);</span>
+<span class="nc" id="L230">        addButton.setEnabled(false);</span>
+<span class="nc" id="L231">        removeButton.setEnabled(false);</span>
+
+<span class="nc" id="L233">        JPanel inputLeft = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));</span>
+<span class="nc" id="L234">        inputLeft.add(new JLabel(&quot;Assignment:&quot;));</span>
+<span class="nc" id="L235">        inputLeft.add(nameField);</span>
+<span class="nc" id="L236">        inputLeft.add(new JLabel(&quot;Due Date:&quot;));</span>
+<span class="nc" id="L237">        inputLeft.add(dateField);</span>
+<span class="nc" id="L238">        inputLeft.add(datePickerButton);</span>
+<span class="nc" id="L239">        inputLeft.add(addButton);</span>
+<span class="nc" id="L240">        inputLeft.add(removeButton);</span>
+
+<span class="nc" id="L242">        NotificationService notificationService = new NotificationService(subjectListModel, frame);</span>
+
+<span class="nc" id="L244">        JButton notifSettingsButton = new JButton(&quot;\uD83D\uDD14&quot;);</span>
+<span class="nc" id="L245">        notifSettingsButton.setToolTipText(&quot;Notification settings&quot;);</span>
+<span class="nc" id="L246">        notifSettingsButton.setFocusPainted(false);</span>
+<span class="nc" id="L247">        notifSettingsButton.putClientProperty(&quot;JButton.buttonType&quot;, &quot;roundRect&quot;);</span>
+<span class="nc" id="L248">        notifSettingsButton.addActionListener(e -&gt; notificationService.showSettingsDialog());</span>
+
+<span class="nc" id="L250">        JButton prefsButton = new JButton(&quot;⚙&quot;); // ⚙ gear</span>
+<span class="nc" id="L251">        prefsButton.setToolTipText(&quot;Preferences&quot;);</span>
+<span class="nc" id="L252">        prefsButton.setFocusPainted(false);</span>
+<span class="nc" id="L253">        prefsButton.putClientProperty(&quot;JButton.buttonType&quot;, &quot;roundRect&quot;);</span>
+<span class="nc" id="L254">        prefsButton.addActionListener(e -&gt; PreferencesDialog.show(frame));</span>
+
+<span class="nc" id="L256">        JPanel inputRight = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 8));</span>
+<span class="nc" id="L257">        inputRight.add(notifSettingsButton);</span>
+<span class="nc" id="L258">        inputRight.add(prefsButton);</span>
+
+<span class="nc" id="L260">        JPanel inputPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L261">        inputPanel.setBorder(BorderFactory.createCompoundBorder(</span>
+<span class="nc" id="L262">            BorderFactory.createMatteBorder(1, 0, 0, 0,</span>
+<span class="nc" id="L263">                UIManager.getColor(&quot;Component.borderColor&quot;)),</span>
+<span class="nc" id="L264">            BorderFactory.createEmptyBorder(2, 4, 2, 4)</span>
+        ));
+<span class="nc" id="L266">        inputPanel.add(inputLeft, BorderLayout.CENTER);</span>
+<span class="nc" id="L267">        inputPanel.add(inputRight, BorderLayout.EAST);</span>
+
+        // --- West: sidebar ---
+<span class="nc" id="L270">        JComboBox&lt;Subject&gt; subjectList = new JComboBox&lt;&gt;();</span>
+<span class="nc bnc" id="L271" title="All 2 branches missed.">        for (int i = 0; i &lt; subjectListModel.size(); i++) {</span>
+<span class="nc" id="L272">            subjectList.addItem(subjectListModel.get(i));</span>
+        }
+<span class="nc" id="L274">        subjectListModel.addListDataListener(new javax.swing.event.ListDataListener() {</span>
+            public void intervalAdded(javax.swing.event.ListDataEvent e) {
+<span class="nc" id="L276">                subjectList.removeAllItems();</span>
+<span class="nc bnc" id="L277" title="All 2 branches missed.">                for (int i = 0; i &lt; subjectListModel.size(); i++) subjectList.addItem(subjectListModel.get(i));</span>
+<span class="nc" id="L278">            }</span>
+            public void intervalRemoved(javax.swing.event.ListDataEvent e) {
+<span class="nc" id="L280">                subjectList.removeAllItems();</span>
+<span class="nc bnc" id="L281" title="All 2 branches missed.">                for (int i = 0; i &lt; subjectListModel.size(); i++) subjectList.addItem(subjectListModel.get(i));</span>
+<span class="nc" id="L282">            }</span>
+            public void contentsChanged(javax.swing.event.ListDataEvent e) {
+<span class="nc" id="L284">                subjectList.removeAllItems();</span>
+<span class="nc bnc" id="L285" title="All 2 branches missed.">                for (int i = 0; i &lt; subjectListModel.size(); i++) subjectList.addItem(subjectListModel.get(i));</span>
+<span class="nc" id="L286">            }</span>
+        });
+
+<span class="nc" id="L289">        JButton newClassButton = new JButton(&quot;+&quot;);</span>
+<span class="nc" id="L290">        newClassButton.setToolTipText(&quot;New class&quot;);</span>
+<span class="nc" id="L291">        JButton renameButton = new JButton(&quot;✎&quot;);</span>
+<span class="nc" id="L292">        renameButton.setToolTipText(&quot;Rename class&quot;);</span>
+<span class="nc" id="L293">        JButton deleteButton = new JButton(&quot;✕&quot;);</span>
+<span class="nc" id="L294">        deleteButton.setToolTipText(&quot;Delete class&quot;);</span>
+<span class="nc" id="L295">        Font iconFont = newClassButton.getFont().deriveFont(Font.BOLD, 14f);</span>
+<span class="nc bnc" id="L296" title="All 2 branches missed.">        for (JButton b : new JButton[]{newClassButton, renameButton, deleteButton}) {</span>
+<span class="nc" id="L297">            b.setFont(iconFont);</span>
+<span class="nc" id="L298">            b.putClientProperty(&quot;JButton.buttonType&quot;, &quot;roundRect&quot;);</span>
+<span class="nc" id="L299">            b.setFocusPainted(false);</span>
+        }
+<span class="nc" id="L301">        renameButton.setEnabled(false);</span>
+<span class="nc" id="L302">        deleteButton.setEnabled(false);</span>
+
+<span class="nc" id="L304">        JPanel sidebarButtonPanel = new JPanel(new GridLayout(1, 3, 6, 0));</span>
+<span class="nc" id="L305">        sidebarButtonPanel.setOpaque(false);</span>
+<span class="nc" id="L306">        sidebarButtonPanel.add(newClassButton);</span>
+<span class="nc" id="L307">        sidebarButtonPanel.add(renameButton);</span>
+<span class="nc" id="L308">        sidebarButtonPanel.add(deleteButton);</span>
+
+
+        // Calendar panel
+<span class="nc" id="L312">        CalendarPanel calendarPanel = new CalendarPanel(subjectListModel);</span>
+
+<span class="nc" id="L314">        theme.addListener(() -&gt; {</span>
+            // Rebuild input border so it picks up the new border color.
+<span class="nc" id="L316">            inputPanel.setBorder(BorderFactory.createCompoundBorder(</span>
+<span class="nc" id="L317">                BorderFactory.createMatteBorder(1, 0, 0, 0,</span>
+<span class="nc" id="L318">                    UIManager.getColor(&quot;Component.borderColor&quot;)),</span>
+<span class="nc" id="L319">                BorderFactory.createEmptyBorder(2, 4, 2, 4)</span>
+            ));
+<span class="nc" id="L321">        });</span>
+
+        // Selection listener: swap table model, toggle controls
+<span class="nc" id="L324">        subjectList.addActionListener(e -&gt; {</span>
+<span class="nc" id="L325">            Subject selected = (Subject) subjectList.getSelectedItem();</span>
+<span class="nc bnc" id="L326" title="All 2 branches missed.">            boolean subjectSelected = selected != null;</span>
+<span class="nc bnc" id="L327" title="All 2 branches missed.">            DefaultTableModel activeModel = subjectSelected ? selected.getTableModel() : emptyTableModel;</span>
+<span class="nc" id="L328">            table.setModel(activeModel);</span>
+<span class="nc" id="L329">            sorter.setModel(activeModel);</span>
+<span class="nc" id="L330">            table.setRowSorter(sorter);</span>
+<span class="nc" id="L331">            applyFilter.run();</span>
+
+<span class="nc" id="L333">            table.getColumnModel().getColumn(3).setMinWidth(0);</span>
+<span class="nc" id="L334">            table.getColumnModel().getColumn(3).setMaxWidth(0);</span>
+<span class="nc" id="L335">            table.getColumnModel().getColumn(3).setWidth(0);</span>
+
+            // Re-apply cell renderer after model swap.
+<span class="nc" id="L338">            DefaultTableCellRenderer r = new DefaultTableCellRenderer();</span>
+<span class="nc" id="L339">            r.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 8));</span>
+<span class="nc" id="L340">            table.getColumnModel().getColumn(0).setCellRenderer(r);</span>
+<span class="nc" id="L341">            table.getColumnModel().getColumn(1).setCellRenderer(r);</span>
+
+<span class="nc" id="L343">            notesPanel.setSubject(selected);</span>
+<span class="nc" id="L344">            nameField.setEnabled(subjectSelected);</span>
+<span class="nc" id="L345">            dateField.setEnabled(subjectSelected);</span>
+<span class="nc" id="L346">            datePickerButton.setEnabled(subjectSelected);</span>
+<span class="nc" id="L347">            addButton.setEnabled(subjectSelected);</span>
+<span class="nc" id="L348">            removeButton.setEnabled(subjectSelected);</span>
+<span class="nc" id="L349">            renameButton.setEnabled(subjectSelected);</span>
+<span class="nc" id="L350">            deleteButton.setEnabled(subjectSelected);</span>
+<span class="nc" id="L351">        });</span>
+
+        // Combo auto-selects the first item when populated above, but the action
+        // listener wasn't attached yet — re-fire so the table picks up the saved
+        // assignments instead of staying on the empty placeholder model.
+<span class="nc bnc" id="L356" title="All 2 branches missed.">        if (subjectList.getItemCount() &gt; 0) {</span>
+<span class="nc" id="L357">            int idx = Math.max(0, subjectList.getSelectedIndex());</span>
+<span class="nc" id="L358">            subjectList.setSelectedIndex(-1);</span>
+<span class="nc" id="L359">            subjectList.setSelectedIndex(idx);</span>
+        }
+
+        // Assignment actions
+<span class="nc" id="L363">        addButton.addActionListener(e -&gt; {</span>
+<span class="nc" id="L364">            Subject selected = (Subject) subjectList.getSelectedItem();</span>
+<span class="nc bnc" id="L365" title="All 2 branches missed.">            if (selected == null) return;</span>
+<span class="nc" id="L366">            String name = nameField.getText().trim();</span>
+<span class="nc" id="L367">            String date = dateField.getText().trim();</span>
+<span class="nc bnc" id="L368" title="All 2 branches missed.">            if (!name.isEmpty()) {</span>
+<span class="nc" id="L369">                selected.getTableModel().addRow(new Object[]{name, date, false, &quot;&quot;});</span>
+<span class="nc" id="L370">                nameField.setText(&quot;&quot;);</span>
+<span class="nc" id="L371">                dateField.setText(&quot;&quot;);</span>
+<span class="nc" id="L372">                pickedDate[0] = null;</span>
+<span class="nc" id="L373">                nameField.requestFocus();</span>
+<span class="nc" id="L374">                calendarPanel.refresh();</span>
+<span class="nc" id="L375">                applyFilter.run();</span>
+            }
+<span class="nc" id="L377">        });</span>
+
+<span class="nc" id="L379">        removeButton.addActionListener(e -&gt; {</span>
+<span class="nc" id="L380">            Subject selected = (Subject) subjectList.getSelectedItem();</span>
+<span class="nc bnc" id="L381" title="All 2 branches missed.">            if (selected == null) return;</span>
+<span class="nc" id="L382">            int row = table.getSelectedRow();</span>
+<span class="nc bnc" id="L383" title="All 2 branches missed.">            if (row &gt;= 0) {</span>
+<span class="nc" id="L384">                selected.getTableModel().removeRow(row);</span>
+<span class="nc" id="L385">                calendarPanel.refresh();</span>
+<span class="nc" id="L386">                applyFilter.run();</span>
+            }
+<span class="nc" id="L388">        });</span>
+
+
+<span class="nc" id="L391">        newClassButton.addActionListener(e -&gt; {</span>
+<span class="nc" id="L392">            String input = JOptionPane.showInputDialog(frame, &quot;Class name:&quot;, &quot;New Class&quot;,</span>
+                    JOptionPane.PLAIN_MESSAGE);
+<span class="nc bnc" id="L394" title="All 2 branches missed.">            if (input == null) return;</span>
+<span class="nc" id="L395">            String name = input.trim();</span>
+<span class="nc bnc" id="L396" title="All 2 branches missed.">            if (name.isEmpty()) {</span>
+<span class="nc" id="L397">                JOptionPane.showMessageDialog(frame, &quot;Class name cannot be empty.&quot;,</span>
+                        &quot;Error&quot;, JOptionPane.ERROR_MESSAGE);
+<span class="nc" id="L399">                return;</span>
+            }
+<span class="nc bnc" id="L401" title="All 2 branches missed.">            for (int i = 0; i &lt; subjectListModel.size(); i++) {</span>
+<span class="nc bnc" id="L402" title="All 2 branches missed.">                if (subjectListModel.get(i).getName().equalsIgnoreCase(name)) {</span>
+<span class="nc" id="L403">                    JOptionPane.showMessageDialog(frame, &quot;A class with that name already exists.&quot;,</span>
+                            &quot;Error&quot;, JOptionPane.ERROR_MESSAGE);
+<span class="nc" id="L405">                    return;</span>
+                }
+            }
+<span class="nc" id="L408">            Subject subject = new Subject(name);</span>
+<span class="nc" id="L409">            subjectListModel.addElement(subject);</span>
+<span class="nc" id="L410">            subjectList.setSelectedItem(subject);</span>
+<span class="nc" id="L411">        });</span>
+
+        // Rename
+<span class="nc" id="L414">        renameButton.addActionListener(e -&gt; {</span>
+<span class="nc" id="L415">            Subject selected = (Subject) subjectList.getSelectedItem();</span>
+<span class="nc bnc" id="L416" title="All 2 branches missed.">            if (selected == null) return;</span>
+<span class="nc" id="L417">            String input = (String) JOptionPane.showInputDialog(frame, &quot;New name:&quot;,</span>
+<span class="nc" id="L418">                    &quot;Rename Class&quot;, JOptionPane.PLAIN_MESSAGE, null, null, selected.getName());</span>
+<span class="nc bnc" id="L419" title="All 2 branches missed.">            if (input == null) return;</span>
+<span class="nc" id="L420">            String name = input.trim();</span>
+<span class="nc bnc" id="L421" title="All 2 branches missed.">            if (name.isEmpty()) {</span>
+<span class="nc" id="L422">                JOptionPane.showMessageDialog(frame, &quot;Class name cannot be empty.&quot;,</span>
+                        &quot;Error&quot;, JOptionPane.ERROR_MESSAGE);
+<span class="nc" id="L424">                return;</span>
+            }
+<span class="nc bnc" id="L426" title="All 2 branches missed.">            for (int i = 0; i &lt; subjectListModel.size(); i++) {</span>
+<span class="nc" id="L427">                Subject s = subjectListModel.get(i);</span>
+<span class="nc bnc" id="L428" title="All 4 branches missed.">                if (s != selected &amp;&amp; s.getName().equalsIgnoreCase(name)) {</span>
+<span class="nc" id="L429">                    JOptionPane.showMessageDialog(frame, &quot;A class with that name already exists.&quot;,</span>
+                            &quot;Error&quot;, JOptionPane.ERROR_MESSAGE);
+<span class="nc" id="L431">                    return;</span>
+                }
+            }
+<span class="nc" id="L434">            int index = subjectList.getSelectedIndex();</span>
+<span class="nc" id="L435">            selected.setName(name);</span>
+<span class="nc" id="L436">            subjectListModel.set(index, selected);</span>
+<span class="nc" id="L437">            subjectList.setSelectedItem(selected);</span>
+<span class="nc" id="L438">            calendarPanel.refresh();</span>
+<span class="nc" id="L439">        });</span>
+
+        // Delete
+<span class="nc" id="L442">        deleteButton.addActionListener(e -&gt; {</span>
+<span class="nc" id="L443">            Subject selected = (Subject) subjectList.getSelectedItem();</span>
+<span class="nc bnc" id="L444" title="All 2 branches missed.">            if (selected == null) return;</span>
+<span class="nc" id="L445">            int confirm = JOptionPane.showConfirmDialog(frame,</span>
+<span class="nc" id="L446">                    &quot;Delete '&quot; + selected.getName() + &quot;' and all its assignments? This cannot be undone.&quot;,</span>
+                    &quot;Delete Class&quot;, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+<span class="nc bnc" id="L448" title="All 2 branches missed.">            if (confirm != JOptionPane.YES_OPTION) return;</span>
+<span class="nc" id="L449">            int index = subjectList.getSelectedIndex();</span>
+<span class="nc" id="L450">            subjectListModel.remove(index);</span>
+<span class="nc bnc" id="L451" title="All 2 branches missed.">            if (!subjectListModel.isEmpty()) {</span>
+<span class="nc" id="L452">                subjectList.setSelectedIndex(Math.max(0, index - 1));</span>
+<span class="nc" id="L453">                subjectList.setSelectedItem(subjectListModel.get(Math.max(0, index - 1)));</span>
+            }
+<span class="nc" id="L455">            calendarPanel.refresh();</span>
+<span class="nc" id="L456">        });</span>
+
+<span class="nc" id="L458">        JScrollPane tableScroll = new JScrollPane(table);</span>
+<span class="nc" id="L459">        tableScroll.setBorder(BorderFactory.createEmptyBorder());</span>
+
+<span class="nc" id="L461">        JPanel tablePanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L462">        tablePanel.add(filterBar, BorderLayout.NORTH);</span>
+<span class="nc" id="L463">        tablePanel.add(tableScroll, BorderLayout.CENTER);</span>
+
+<span class="nc" id="L465">        JSplitPane assignmentSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, tablePanel, notesPanel);</span>
+<span class="nc" id="L466">        assignmentSplit.setResizeWeight(0.75);</span>
+<span class="nc" id="L467">        assignmentSplit.setBorder(null);</span>
+
+        // App header bar
+<span class="nc" id="L470">        JLabel appTitle = new JLabel(&quot;Assignment Tracker&quot;);</span>
+<span class="nc" id="L471">        appTitle.setFont(appTitle.getFont().deriveFont(Font.BOLD, 15f));</span>
+
+<span class="nc" id="L473">        JPanel headerControls = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));</span>
+<span class="nc" id="L474">        headerControls.setOpaque(false);</span>
+<span class="nc" id="L475">        headerControls.add(new JLabel(&quot;Class:&quot;));</span>
+<span class="nc" id="L476">        headerControls.add(subjectList);</span>
+<span class="nc" id="L477">        headerControls.add(newClassButton);</span>
+<span class="nc" id="L478">        headerControls.add(renameButton);</span>
+<span class="nc" id="L479">        headerControls.add(deleteButton);</span>
+
+<span class="nc" id="L481">        JPanel headerBar = new JPanel(new BorderLayout(12, 0));</span>
+<span class="nc" id="L482">        headerBar.setBorder(BorderFactory.createCompoundBorder(</span>
+<span class="nc" id="L483">            BorderFactory.createMatteBorder(0, 0, 1, 0,</span>
+<span class="nc" id="L484">                UIManager.getColor(&quot;Component.borderColor&quot;)),</span>
+<span class="nc" id="L485">            BorderFactory.createEmptyBorder(8, 12, 8, 12)</span>
+        ));
+<span class="nc" id="L487">        headerBar.add(appTitle, BorderLayout.WEST);</span>
+<span class="nc" id="L488">        headerBar.add(headerControls, BorderLayout.CENTER);</span>
+
+<span class="nc" id="L490">        theme.addListener(() -&gt; {</span>
+<span class="nc" id="L491">            headerBar.setBorder(BorderFactory.createCompoundBorder(</span>
+<span class="nc" id="L492">                BorderFactory.createMatteBorder(0, 0, 1, 0,</span>
+<span class="nc" id="L493">                    UIManager.getColor(&quot;Component.borderColor&quot;)),</span>
+<span class="nc" id="L494">                BorderFactory.createEmptyBorder(8, 12, 8, 12)</span>
+            ));
+<span class="nc" id="L496">        });</span>
+
+        // Scratchpad tab
+<span class="nc" id="L499">        JTextArea scratchArea = new JTextArea(DataStore.loadScratchpad());</span>
+<span class="nc" id="L500">        scratchArea.setLineWrap(true);</span>
+<span class="nc" id="L501">        scratchArea.setWrapStyleWord(true);</span>
+<span class="nc" id="L502">        scratchArea.setBorder(BorderFactory.createEmptyBorder(10, 12, 10, 12));</span>
+
+<span class="nc" id="L504">        JButton saveScratchButton = new JButton(&quot;Save Notes&quot;);</span>
+<span class="nc" id="L505">        saveScratchButton.putClientProperty(&quot;JButton.buttonType&quot;, &quot;roundRect&quot;);</span>
+<span class="nc" id="L506">        saveScratchButton.setFocusPainted(false);</span>
+<span class="nc" id="L507">        saveScratchButton.addActionListener(e -&gt; DataStore.saveScratchpad(scratchArea.getText()));</span>
+
+<span class="nc" id="L509">        JPanel scratchSouth = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 6));</span>
+<span class="nc" id="L510">        scratchSouth.add(saveScratchButton);</span>
+
+<span class="nc" id="L512">        JPanel scratchPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L513">        scratchPanel.add(new JScrollPane(scratchArea), BorderLayout.CENTER);</span>
+<span class="nc" id="L514">        scratchPanel.add(scratchSouth, BorderLayout.SOUTH);</span>
+
+<span class="nc" id="L516">        JTabbedPane tabs = new JTabbedPane();</span>
+<span class="nc" id="L517">        tabs.addTab(&quot;Assignments&quot;, assignmentSplit);</span>
+<span class="nc" id="L518">        tabs.addTab(&quot;Calendar&quot;, calendarPanel);</span>
+<span class="nc" id="L519">        tabs.addTab(&quot;Notes&quot;, scratchPanel);</span>
+
+<span class="nc" id="L521">        tabs.addChangeListener(e -&gt; {</span>
+<span class="nc bnc" id="L522" title="All 2 branches missed.">            if (tabs.getSelectedComponent() == calendarPanel) {</span>
+<span class="nc" id="L523">                calendarPanel.refresh();</span>
+            }
+<span class="nc" id="L525">        });</span>
+
+<span class="nc" id="L527">        JPanel centerPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L528">        centerPanel.add(headerBar, BorderLayout.NORTH);</span>
+<span class="nc" id="L529">        centerPanel.add(tabs, BorderLayout.CENTER);</span>
+
+<span class="nc" id="L531">        frame.setLayout(new BorderLayout());</span>
+<span class="nc" id="L532">        frame.add(centerPanel, BorderLayout.CENTER);</span>
+<span class="nc" id="L533">        frame.add(inputPanel, BorderLayout.SOUTH);</span>
+<span class="nc" id="L534">        frame.setVisible(true);</span>
+<span class="nc" id="L535">        notificationService.start();</span>
+<span class="nc" id="L536">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
